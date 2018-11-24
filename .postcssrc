@@ -1,0 +1,7 @@
+{
+  "modules": true,
+  "plugins": {
+    "postcss-modules-values": {},
+    "autoprefixer": { "browsers": ["last 2 versions"] }
+  }
+}
