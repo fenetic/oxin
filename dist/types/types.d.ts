@@ -1,4 +1,7 @@
-export declare type UseOxin = [FormState, OxinPropsFunction];
+export declare type UseOxin = {
+    inputState: InputState;
+    inputProps: OxinPropsFunction;
+};
 export declare type ValidatorCreator<S> = (settings: S) => ValidatorFunction | ValidatorFunctionAsync;
 export declare type ValidatorFunction = (value: any) => ValidatorResult;
 export declare type ValidatorFunctionAsync = (value: any) => Promise<ValidatorResult>;
@@ -23,7 +26,7 @@ export interface ValidatingState {
 export interface FormFields {
     [fieldName: string]: any;
 }
-export interface FormState {
+export interface InputState {
     readonly valid: boolean;
     readonly touched: {
         [fieldName: string]: boolean;
@@ -36,13 +39,13 @@ export interface FormState {
     };
     readonly values: any;
 }
-export interface FieldOptions {
+export interface InputOptions {
     initialValue?: any;
     name: string;
     validation?: OptionsValidation;
     validators?: OptionsValidators;
 }
-export declare type OxinPropsFunction = (options: FieldOptions) => OxinProps;
+export declare type OxinPropsFunction = (options: InputOptions) => OxinProps;
 export interface ValidationProps {
     valid: boolean;
     messages: any[];

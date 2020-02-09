@@ -1,8 +1,8 @@
 import { useReducer, useRef } from 'react';
-import debounce = require('lodash.debounce');
+import debounce from 'lodash.debounce';
 
 import {
-  FieldOptions,
+  InputOptions,
   OxinProps,
   ValidationProps,
   UseOxin,
@@ -43,11 +43,11 @@ const validationEquals = (v1: ValidationState, v2: ValidationState) => {
 };
 
 export function useOxin(): UseOxin {
-  const [formState, dispatch] = useReducer(reducer, initialState);
+  const [inputState, dispatch] = useReducer(reducer, initialState);
   const fieldCache = useCache();
 
-  const createProps = (fieldOptions: FieldOptions): OxinProps => {
-    const { initialValue, name, validation, validators } = fieldOptions;
+  const inputProps = (inputOptions: InputOptions): OxinProps => {
+    const { initialValue, name, validation, validators } = inputOptions;
     const validatorCount = validators?.length || 0;
     const cacheKeys = {
       validationProp: `${name}-validationProp`,
@@ -124,7 +124,7 @@ export function useOxin(): UseOxin {
     // If the field is new to the state, dispatch an initial setValue
     // to kick things off. This is how we dynamically add fields when
     // we call the props creator.
-    if (!(name in formState.values)) {
+    if (!(name in inputState.values)) {
       dispatch(
         setValue({
           name,
@@ -137,7 +137,7 @@ export function useOxin(): UseOxin {
       handleRunValidators(initialValue);
     }
 
-    const validationState = formState.validation[name] || {};
+    const validationState = inputState.validation[name] || {};
     const cachedValidation = fieldCache.get(cacheKeys.validationProp);
 
     // Cache transformed validation state to prevent unnecessary renders
@@ -182,10 +182,10 @@ export function useOxin(): UseOxin {
 
     return {
       name,
-      value: formState.values[name],
-      touched: formState.touched[name],
+      value: inputState.values[name],
+      touched: inputState.touched[name],
       validation: fieldCache.get(cacheKeys.validationProp),
-      validating: formState.validating[name],
+      validating: inputState.validating[name],
       onChange: handleChange,
       onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value: any) => {
         if (validation?.onBlur) {
@@ -198,5 +198,5 @@ export function useOxin(): UseOxin {
     };
   };
 
-  return [formState, createProps];
+  return { inputState, inputProps: inputProps };
 }

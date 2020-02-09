@@ -1,7 +1,7 @@
 import {
   Action,
   ActionType,
-  FormState,
+  InputState,
   SetValueAction,
   SetValidationAction,
   RemoveInputAction,
@@ -9,7 +9,7 @@ import {
 
 import { allFieldsValid } from './validation';
 
-export const initialState: FormState = {
+export const initialState: InputState = {
   touched: {},
   valid: true,
   validating: {},
@@ -17,7 +17,7 @@ export const initialState: FormState = {
   values: {},
 };
 
-export const reducer = (state: FormState, action: Action): FormState => {
+export const reducer = (state: InputState, action: Action): InputState => {
   switch (action.type) {
     case ActionType.SET_VALUE: {
       const {

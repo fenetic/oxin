@@ -1,3 +1,3 @@
-import { Action, FormState } from './types';
-export declare const initialState: FormState;
-export declare const reducer: (state: FormState, action: Action) => FormState;
+import { Action, InputState } from './types';
+export declare const initialState: InputState;
+export declare const reducer: (state: InputState, action: Action) => InputState;

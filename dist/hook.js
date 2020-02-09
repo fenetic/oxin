@@ -1,7 +1,10 @@
 "use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 const react_1 = require("react");
-const debounce = require("lodash.debounce");
+const lodash_debounce_1 = __importDefault(require("lodash.debounce"));
 const reducer_1 = require("./reducer");
 const actions_1 = require("./actions");
 const validation_1 = require("./validation");
@@ -20,11 +23,11 @@ const validationEquals = (v1, v2) => {
     return stringify(v1) === stringify(v2);
 };
 function useOxin() {
-    const [formState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
+    const [inputState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
     const fieldCache = useCache();
-    const createProps = (fieldOptions) => {
+    const inputProps = (inputOptions) => {
         var _a, _b;
-        const { initialValue, name, validation, validators } = fieldOptions;
+        const { initialValue, name, validation, validators } = inputOptions;
         const validatorCount = ((_a = validators) === null || _a === void 0 ? void 0 : _a.length) || 0;
         const cacheKeys = {
             validationProp: `${name}-validationProp`,
@@ -57,8 +60,8 @@ function useOxin() {
             fieldCache.set(cacheKeys.validationBatchCount, fieldCache.get(cacheKeys.validationBatchCount) + 1);
             validation_1.runValidators(validators || [], value, (result, validator) => handleSetValidation(Array.isArray(validator) ? validator[0].name : validator.name, result, Array.isArray(validator) ? validator[1] : undefined));
         };
-        const handleRunValidatorsDebounced = debounce(handleRunValidators, ((_b = validation) === null || _b === void 0 ? void 0 : _b.debounce) || 0);
-        if (!(name in formState.values)) {
+        const handleRunValidatorsDebounced = lodash_debounce_1.default(handleRunValidators, ((_b = validation) === null || _b === void 0 ? void 0 : _b.debounce) || 0);
+        if (!(name in inputState.values)) {
             dispatch(actions_1.setValue({
                 name,
                 fromInitial: true,
@@ -67,7 +70,7 @@ function useOxin() {
             }));
             handleRunValidators(initialValue);
         }
-        const validationState = formState.validation[name] || {};
+        const validationState = inputState.validation[name] || {};
         const cachedValidation = fieldCache.get(cacheKeys.validationProp);
         if (!cachedValidation ||
             !validationEquals(cachedValidation, validationState)) {
@@ -91,10 +94,10 @@ function useOxin() {
         });
         return {
             name,
-            value: formState.values[name],
-            touched: formState.touched[name],
+            value: inputState.values[name],
+            touched: inputState.touched[name],
             validation: fieldCache.get(cacheKeys.validationProp),
-            validating: formState.validating[name],
+            validating: inputState.validating[name],
             onChange: handleChange,
             onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value) => {
                 var _a;
@@ -107,7 +110,7 @@ function useOxin() {
             }),
         };
     };
-    return [formState, createProps];
+    return { inputState, inputProps: inputProps };
 }
 exports.useOxin = useOxin;
 //# sourceMappingURL=hook.js.map

@@ -10,7 +10,7 @@ import {
 import userEvent from '@testing-library/user-event';
 
 import { TestForm, TestInput } from '../test-components';
-import { FieldOptions } from '../types';
+import { InputOptions } from '../types';
 
 jest.mock('lodash.debounce', () => jest.fn(fn => fn));
 
@@ -22,7 +22,7 @@ const asyncCheck = async (value: string) => {
   return value === 'Correcto';
 };
 
-const inputs: FieldOptions[] = [
+const inputs: InputOptions[] = [
   { name: 'test1', initialValue: 'Initial value' },
   {
     name: 'test2',
@@ -49,13 +49,13 @@ const inputs: FieldOptions[] = [
 
 const Form = () => (
   <TestForm>
-    {(formState, propsCreator) => (
+    {(inputState, propsCreator) => (
       <>
         <TestInput {...propsCreator(inputs[0])} />
         <TestInput {...propsCreator(inputs[1])} />
         <TestInput {...propsCreator(inputs[2])} />
         <TestInput {...propsCreator(inputs[3])} />
-        <span data-testid="allValid">{formState.valid.toString()}</span>
+        <span data-testid="allValid">{inputState.valid.toString()}</span>
       </>
     )}
   </TestForm>

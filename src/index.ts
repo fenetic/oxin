@@ -4,8 +4,7 @@ export {
   ValidatorCreator,
   ValidatorFunction,
   ValidatorFunctionAsync,
-  FieldOptions,
-  FormState,
-  OxinPropsFunction,
+  InputOptions,
+  InputState,
   OxinProps,
 } from './types';

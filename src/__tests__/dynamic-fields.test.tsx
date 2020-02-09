@@ -8,7 +8,7 @@ import { TestForm, TestMulti } from '../test-components';
 const Form = () => {
   return (
     <TestForm>
-      {(formState, propsCreator) => (
+      {(inputState, propsCreator) => (
         <>
           <TestMulti propsCreator={propsCreator} />
         </>
