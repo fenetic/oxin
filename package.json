@@ -3,7 +3,7 @@
   "version": "0.1.3",
   "description": "React form auxiliary state hook",
   "main": "./dist/index.js",
-  "types": "./dist/index.d.ts",
+  "types": "./dist/types/index.d.ts",
   "files": [
     "dist"
   ],
