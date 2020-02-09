@@ -1,29 +1,65 @@
 {
-  "name": "use-validation",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
+  "name": "oxin",
+  "version": "0.1.1",
+  "description": "React form auxiliary state hook",
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "files": [
+    "dist"
+  ],
   "scripts": {
-    "start": "parcel ./src/index.html"
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "format": "prettier --write \"src/**/*.ts?(x)\"",
+    "lint": "eslint './src/**/*.ts?(x)'",
+    "postversion": "git push && git push --tags",
+    "prepare": "npm run build",
+    "prepublishOnly": "npm test && npm run lint",
+    "test": "jest",
+    "test:watch": "jest --watch",
+    "test:coverage": "jest --coverage",
+    "version": "npm run format && git add -A src"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "react",
+    "form",
+    "state",
+    "hook"
+  ],
+  "author": "Fen Walker <hello@madebyfen.co.uk>",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Madebyfen/oxin.git"
+  },
   "license": "ISC",
   "dependencies": {
-    "@types/react": "^16.7.7",
-    "@types/react-dom": "^16.0.10",
-    "autoprefixer": "^9.3.1",
-    "normalize.css": "^8.0.1",
-    "parcel-bundler": "^1.10.3",
-    "postcss-modules": "^1.4.1",
-    "postcss-modules-values": "^2.0.0",
-    "prettier": "^1.15.2",
-    "react": "^16.6.3",
-    "react-dom": "^16.6.3",
-    "tslint": "^5.11.0",
-    "typescript": "^3.1.6"
+    "@types/lodash.debounce": "^4.0.6",
+    "lodash.debounce": "^4.0.8",
+    "typescript": "^3.7.5"
+  },
+  "peerDependencies": {
+    "react": "^16.12.0"
   },
   "devDependencies": {
-    "prettier-tslint": "^0.4.0"
+    "@babel/polyfill": "^7.8.3",
+    "@testing-library/react": "^9.4.0",
+    "@testing-library/react-hooks": "^3.2.1",
+    "@testing-library/user-event": "^8.1.0",
+    "@types/jest": "^24.9.1",
+    "@types/react": "^16.9.19",
+    "@types/react-dom": "^16.9.5",
+    "@typescript-eslint/eslint-plugin": "^2.19.0",
+    "@typescript-eslint/parser": "^2.19.0",
+    "eslint": "^6.8.0",
+    "eslint-config-prettier": "^6.10.0",
+    "eslint-plugin-prettier": "^3.1.2",
+    "eslint-plugin-react": "^7.18.3",
+    "eslint-plugin-react-hooks": "^2.3.0",
+    "jest": "^25.1.0",
+    "prettier": "^1.19.1",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
+    "react-test-renderer": "^16.12.0",
+    "ts-jest": "^25.2.0"
   }
 }
