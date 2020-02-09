@@ -1,8 +1,8 @@
-import { ReactNode } from 'react';
-
 export type UseOxin = [FormState, OxinPropsFunction];
 
-export type ValidatorCreator<S> = (settings: S) => ValidatorFunction;
+export type ValidatorCreator<S> = (
+  settings: S,
+) => ValidatorFunction | ValidatorFunctionAsync;
 
 export type ValidatorFunction = (value: any) => ValidatorResult;
 
@@ -57,10 +57,8 @@ export interface FormState {
 }
 
 export interface FieldOptions {
-  initial?: any;
-  label?: string | ReactNode;
+  initialValue?: any;
   name: string;
-  type?: string;
   validation?: OptionsValidation;
   validators?: OptionsValidators;
 }

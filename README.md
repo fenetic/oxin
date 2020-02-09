@@ -15,8 +15,7 @@ Oxin is a form state companion designed to make handling inputs and validation a
 
 Oxin was built with the following notions and ideals in mind:
 
-- Forms should not require a complex component tree because of their state managment.
-- Form state should belong to the form component.
+- Forms should not require a complex component tree to cope with the design of state.
 - Building form state should be declarative.
 - Inputs can be _any type_.
 - Validation can be complex and asynchronous.
@@ -61,9 +60,26 @@ const MyForm = () => {
 }
 ```
 
-This creates an input field in Oxin's state and provides your input component (whatever you decide that to be) with a few choice props (including change and blur handlers) which are used to update and track state for that field.
+This creates a field in `inputState` and the input component is now able to update state via the `onChange` handler prop.
 
-Don't worry about calling on every render, Oxin uses caching to prevent unnecessary validation and updates; although you may want to memoise your inputs as updates to form state will cause the form component to re-render.
+```javascript
+// inputState after first render
+{
+  "touched": {
+    "myField": false,
+  },
+  "valid": true,
+  "validating": {
+    "myField": false,
+  },
+  "validation": {},
+  "values": {
+    "myField": null,
+  }
+}
+```
+
+Don't worry about calling on every render, Oxin uses caching to prevent unnecessary validation and updates; although in performance-sensitive scenarios you may want to memoise your inputs as updates to form state will cause the form component to re-render.
 
 ## Validation
 
@@ -80,19 +96,26 @@ const required = value => value !== '';
 />;
 ```
 
-Oxin validator functions can be as simple (like above) or complex as you need. They just need to return `true` if valid or `false` when invalid.
+Oxin validator functions can be as simple (like above) or complex as you need. They just need to return `true` when valid or `false` when invalid.
 
-**N.b. validators must be _named_ functions**.
+**N.b. validators must be _named_ functions. If you want to use arrow functions, they must be assigned first (as in the example above.) If you want to define validators inline, use [function declarations](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function).**
 
-When validators are executed they are added to input state, with their `valid` state and error messages.
+When validators are resolved they are added to input state, with their `valid` state and error messages.
 
-You can also provide validator creators, which are higher order functions that take options and return validators based on those options:
+You can also provide validator creators, which are useful for creating resuable validators; they are functions that take options and return validators based on those options:
 
 ```javascript
-const minLength = length =>
+const createMinLength = length =>
   function minLength(value: string) {
     return value.length < length;
   };
+
+//...
+
+inputProps({
+  name: 'text1',
+  validators: [createMinLength(8)],
+});
 ```
 
 ## Validation error messages
@@ -144,15 +167,60 @@ You can include a mix of sync and async functions, and you do not need to worry 
 
 All the examples above use strings as input types, but your inputs can be any type you need them to be. For instance, you could have an input component that generates and image that you run through a specialised image validator that runs asynchronously! An aim of this library is to provide flexibility to input components.
 
-## `InputPropsOptions`
+# API
+
+## `InputOptions`
 
 You can supply the following options to the `inputProps()` props creator:
+
+### `initialValue: any`
+
+Initial value for the input. Setting the initial value will run validators, but will not mark the field as `touched`. If you need protection from re-validating against an initial value, you can do so in a validator creator with an early return:
+
+```javascript
+const createUniqueValidator = initialValue =>
+  function isUnique(value) {
+    if (initialValue === value) return true;
+
+    // Or continue with validation...
+  };
+
+// ...
+
+inputProps({
+  name: 'text1',
+  initialValue: someInitialValue
+  validators: [createUniqueValidator(someInitialValue)]
+})
+```
 
 ### `name: string`
 
 The name of the input field.
 
-### ``
+### `validation: ValidationOptions`
+
+Options for validation behaviour:
+
+**`debounce?: number = 0`** A number in milliseconds to debounce validation runs by. The longer this number, the longer the pause between last input signal and validation execution. If this is `0` (default), debouncing will not be applied.
+
+**`onBlur?: boolean`** If this is set to `true`, validators will be executed when the `onBlur(value)` prop is called.
+
+### `validators: (ValidatorFunction | ValidatorFunctionAsync | ValidatorTuple)[]`
+
+An array of validators which can be any of the following:
+
+```typescript
+// A function that returns true or false
+type ValidatorFunction = (value: any) => boolean;
+// An asynchronous function that returns true or false
+type ValidatorFunctionAsync = (value: any) => Promise<boolean>;
+// A 'tuple' of either of the above and a related error message
+type ValidatorTuple = [
+  ValidatorFunction | ValidatorFunctionAsync,
+  ValidatorMessage,
+];
+```
 
 ## Props
 
@@ -160,7 +228,7 @@ The props creator generates the following props for use with input components:
 
 ### `name: string`
 
-The name of the input as set in `OxinOptions`.
+The name of the input as set in `InputOptions`.
 
 ### `touched: boolean`
 

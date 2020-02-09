@@ -24,7 +24,7 @@ function useOxin() {
     const fieldCache = useCache();
     const createProps = (fieldOptions) => {
         var _a, _b;
-        const { initial, name, validation, validators } = fieldOptions;
+        const { initialValue, name, validation, validators } = fieldOptions;
         const validatorCount = ((_a = validators) === null || _a === void 0 ? void 0 : _a.length) || 0;
         const cacheKeys = {
             validationProp: `${name}-validationProp`,
@@ -62,10 +62,10 @@ function useOxin() {
             dispatch(actions_1.setValue({
                 name,
                 fromInitial: true,
-                value: initial || null,
+                value: initialValue || null,
                 validating: false,
             }));
-            handleRunValidators(initial);
+            handleRunValidators(initialValue);
         }
         const validationState = formState.validation[name] || {};
         const cachedValidation = fieldCache.get(cacheKeys.validationProp);

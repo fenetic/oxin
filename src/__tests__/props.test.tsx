@@ -23,15 +23,13 @@ const asyncCheck = async (value: string) => {
 };
 
 const inputs: FieldOptions[] = [
-  { name: 'test1', type: 'text', initial: 'Initial value' },
+  { name: 'test1', initialValue: 'Initial value' },
   {
     name: 'test2',
-    type: 'text',
     validators: [required],
   },
   {
     name: 'test3',
-    type: 'text',
     validators: [
       [required, 'Give it some'],
       [maxLength, 'Too much'],
@@ -42,7 +40,6 @@ const inputs: FieldOptions[] = [
   },
   {
     name: 'test4',
-    type: 'text',
     validators: [[asyncCheck, 'Not today']],
     validation: {
       debounce: 500,
