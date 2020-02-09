@@ -8,7 +8,7 @@
     "dist"
   ],
   "scripts": {
-    "build": "tsc",
+    "build": "rm -rf dist && tsc",
     "dev": "tsc --watch",
     "format": "prettier --write \"src/**/*.ts?(x)\"",
     "lint": "eslint './src/**/*.ts?(x)'",
