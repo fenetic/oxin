@@ -75,13 +75,13 @@ export interface SetValueAction extends BaseAction {
         name: string;
         value: any;
         fromInitial?: boolean;
+        validating: boolean;
     };
 }
 export interface SetValidationAction extends BaseAction {
     payload: {
         fieldName: string;
         validation: ValidationState;
-        fromInitial?: boolean;
         isFinal: boolean;
     };
 }

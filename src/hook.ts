@@ -130,6 +130,7 @@ export function useOxin(): UseOxin {
           name,
           fromInitial: true,
           value: initial || null,
+          validating: false,
         }),
       );
 
@@ -163,7 +164,7 @@ export function useOxin(): UseOxin {
     const handleChange = fieldCache.getOrSet(
       cacheKeys.onChange,
       async (value: any) => {
-        dispatch(setValue({ name, value }));
+        dispatch(setValue({ name, value, validating: !!validators?.length }));
 
         fieldCache.set(
           cacheKeys.changes,

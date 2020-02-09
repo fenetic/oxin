@@ -205,10 +205,12 @@ describe('Props', () => {
     });
     const { getByTestId } = renderResult;
 
+    const input1 = getByTestId('input-test1');
+    const validating1 = getByTestId('validating-test1');
     const input4 = getByTestId('input-test4');
     const messages4 = getByTestId('validationMessages-test4');
     const valid4 = getByTestId('valid-test4');
-    const validating4 = getByTestId('valid-test4');
+    const validating4 = getByTestId('validating-test4');
 
     await act(async () => {
       await wait(() => userEvent.type(input4, 'Correcto'));
@@ -219,11 +221,13 @@ describe('Props', () => {
     expect(messages4.textContent).toBe('');
 
     act(() => {
+      userEvent.type(input1, 'No validators on Frank');
       userEvent.type(input4, 'Not so valid');
     });
 
     expect(valid4.textContent).toBe('true');
     expect(messages4.textContent).toBe('');
+    expect(validating1.textContent).toBe('false');
     expect(validating4.textContent).toBe('true');
 
     await act(async () => {

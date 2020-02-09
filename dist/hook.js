@@ -63,6 +63,7 @@ function useOxin() {
                 name,
                 fromInitial: true,
                 value: initial || null,
+                validating: false,
             }));
             handleRunValidators(initial);
         }
@@ -80,10 +81,10 @@ function useOxin() {
             }), { valid: true, messages: [] }));
         }
         const handleChange = fieldCache.getOrSet(cacheKeys.onChange, async (value) => {
-            var _a;
-            dispatch(actions_1.setValue({ name, value }));
+            var _a, _b;
+            dispatch(actions_1.setValue({ name, value, validating: !!((_a = validators) === null || _a === void 0 ? void 0 : _a.length) }));
             fieldCache.set(cacheKeys.changes, fieldCache.get(cacheKeys.changes) + 1);
-            const dispatchValidators = !!((_a = validation) === null || _a === void 0 ? void 0 : _a.debounce) && fieldCache.get(cacheKeys.changes) > 1
+            const dispatchValidators = !!((_b = validation) === null || _b === void 0 ? void 0 : _b.debounce) && fieldCache.get(cacheKeys.changes) > 1
                 ? handleRunValidatorsDebounced
                 : handleRunValidators;
             dispatchValidators(value);

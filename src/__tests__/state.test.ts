@@ -2,17 +2,21 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useOxin } from '../hook';
 import { OxinProps } from '../types';
+import { initialState, reducer } from '../reducer';
 
-describe('useOxin', () => {
-  it('returns initial state', () => {
+describe('Oxin state', () => {
+  it('reducer returns default state', () => {
+    expect(reducer(initialState, { type: 'SOME_ACTION' } as any)).toEqual(
+      initialState,
+    );
+  });
+
+  it('useOxin returns initial state', () => {
     const {
       result: { current },
     } = renderHook(() => useOxin());
 
-    expect(current[0].touched).toEqual({});
-    expect(current[0].validating).toEqual({});
-    expect(current[0].valid).toBe(true);
-    expect(current[0].values).toEqual({});
+    expect(current[0]).toEqual(initialState);
   });
 
   it('adds fields to state', async () => {

@@ -9,17 +9,15 @@ exports.initialState = {
     validation: {},
     values: {},
 };
-exports.reducer = (state = exports.initialState, action) => {
+exports.reducer = (state, action) => {
     switch (action.type) {
         case types_1.ActionType.SET_VALUE: {
-            const { payload: { fromInitial, name, value }, } = action;
-            return Object.assign(Object.assign({}, state), { touched: Object.assign(Object.assign({}, state.touched), { [name]: !fromInitial }), values: Object.assign(Object.assign({}, state.values), { [name]: value }), validating: Object.assign(Object.assign({}, state.validating), { [name]: !fromInitial }) });
+            const { payload: { fromInitial, name, value, validating }, } = action;
+            return Object.assign(Object.assign({}, state), { touched: Object.assign(Object.assign({}, state.touched), { [name]: !fromInitial }), values: Object.assign(Object.assign({}, state.values), { [name]: value }), validating: Object.assign(Object.assign({}, state.validating), { [name]: validating }) });
         }
         case types_1.ActionType.SET_VALIDATION: {
-            const { payload: { fieldName, fromInitial, validation, isFinal }, } = action;
-            const newState = Object.assign(Object.assign({}, state), { validating: Object.assign(Object.assign({}, state.validating), { [fieldName]: !isFinal }), validation: fromInitial
-                    ? state.validation
-                    : Object.assign(Object.assign({}, state.validation), { [fieldName]: Object.assign(Object.assign({}, state.validation[fieldName]), validation) }) });
+            const { payload: { fieldName, validation, isFinal }, } = action;
+            const newState = Object.assign(Object.assign({}, state), { validating: Object.assign(Object.assign({}, state.validating), { [fieldName]: !isFinal }), validation: Object.assign(Object.assign({}, state.validation), { [fieldName]: Object.assign(Object.assign({}, state.validation[fieldName]), validation) }) });
             newState.valid = validation_1.allFieldsValid(newState);
             return newState;
         }

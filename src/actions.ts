@@ -10,6 +10,7 @@ export const setValue = (payload: {
   name: string;
   value: any;
   fromInitial?: boolean;
+  validating: boolean;
 }): SetValueAction => ({
   payload,
   type: ActionType.SET_VALUE,
