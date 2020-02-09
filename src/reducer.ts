@@ -17,11 +17,11 @@ export const initialState: FormState = {
   values: {},
 };
 
-export const reducer = (state = initialState, action: Action): FormState => {
+export const reducer = (state: FormState, action: Action): FormState => {
   switch (action.type) {
     case ActionType.SET_VALUE: {
       const {
-        payload: { fromInitial, name, value },
+        payload: { fromInitial, name, value, validating },
       } = action as SetValueAction;
 
       return {
@@ -36,14 +36,14 @@ export const reducer = (state = initialState, action: Action): FormState => {
         },
         validating: {
           ...state.validating,
-          [name]: !fromInitial,
+          [name]: validating,
         },
       };
     }
 
     case ActionType.SET_VALIDATION: {
       const {
-        payload: { fieldName, fromInitial, validation, isFinal },
+        payload: { fieldName, validation, isFinal },
       } = action as SetValidationAction;
 
       const newState = {
@@ -52,15 +52,13 @@ export const reducer = (state = initialState, action: Action): FormState => {
           ...state.validating,
           [fieldName]: !isFinal,
         },
-        validation: fromInitial
-          ? state.validation
-          : {
-              ...state.validation,
-              [fieldName]: {
-                ...state.validation[fieldName],
-                ...validation,
-              },
-            },
+        validation: {
+          ...state.validation,
+          [fieldName]: {
+            ...state.validation[fieldName],
+            ...validation,
+          },
+        },
       };
 
       newState.valid = allFieldsValid(newState);

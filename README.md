@@ -13,10 +13,10 @@ Oxin is a form state companion designed to make handling inputs and validation a
 - The state of your input field values and validity.
 - A props creator for your input components that dynamically creates form state.
 
-Oxin was built with the following notions and ideals:
+Oxin was built with the following notions and ideals in mind:
 
 - Forms should not require a complex component tree because of their state managment.
-- Form state should be managed in the form component.
+- Form state should belong to the form component.
 - Building form state should be declarative.
 - Inputs can be _any type_.
 - Validation can be complex and asynchronous.

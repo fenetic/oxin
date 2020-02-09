@@ -3,6 +3,7 @@ export declare const setValue: (payload: {
     name: string;
     value: any;
     fromInitial?: boolean | undefined;
+    validating: boolean;
 }) => SetValueAction;
 export declare const setValidation: (payload: {
     fieldName: string;
