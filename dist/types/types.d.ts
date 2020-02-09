@@ -1,6 +1,5 @@
-import { ReactNode } from 'react';
 export declare type UseOxin = [FormState, OxinPropsFunction];
-export declare type ValidatorCreator<S> = (settings: S) => ValidatorFunction;
+export declare type ValidatorCreator<S> = (settings: S) => ValidatorFunction | ValidatorFunctionAsync;
 export declare type ValidatorFunction = (value: any) => ValidatorResult;
 export declare type ValidatorFunctionAsync = (value: any) => Promise<ValidatorResult>;
 export declare type ValidatorResult = boolean;
@@ -38,10 +37,8 @@ export interface FormState {
     readonly values: any;
 }
 export interface FieldOptions {
-    initial?: any;
-    label?: string | ReactNode;
+    initialValue?: any;
     name: string;
-    type?: string;
     validation?: OptionsValidation;
     validators?: OptionsValidators;
 }
