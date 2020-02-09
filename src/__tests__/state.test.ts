@@ -23,8 +23,8 @@ describe('Oxin state', () => {
     const { result } = renderHook(() => useOxin());
 
     act(() => {
-      result.current[1]({ name: 'myField', type: 'someType' });
-      result.current[1]({ name: 'myOtherField', type: 'someOtherType' });
+      result.current[1]({ name: 'myField' });
+      result.current[1]({ name: 'myOtherField' });
     });
 
     // touched, validating, values
@@ -49,7 +49,7 @@ describe('Oxin state', () => {
       const { result } = renderHook(() => useOxin());
 
       act(() => {
-        const props = result.current[1]({ name: 'myField', type: 'someType' });
+        const props = result.current[1]({ name: 'myField' });
 
         props.onChange('Some value');
       });
@@ -63,11 +63,10 @@ describe('Oxin state', () => {
       const { result } = renderHook(() => useOxin());
 
       act(() => {
-        result.current[1]({ name: 'myField', type: 'someType' });
+        result.current[1]({ name: 'myField' });
 
         result.current[1]({
           name: 'myOtherField',
-          type: 'someOtherType',
         });
       });
 
