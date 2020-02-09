@@ -1,7 +1,7 @@
 import React, { useRef, useEffect, useState } from 'react';
 
 import { useOxin } from '.';
-import { OxinProps, FormState, OxinPropsFunction } from './types';
+import { OxinProps, InputState, OxinPropsFunction } from './types';
 
 export const TestInput = React.memo(function TestInput({
   name,
@@ -82,11 +82,11 @@ export const TestForm = ({
   children,
 }: {
   children: (
-    inputState: FormState,
+    inputState: InputState,
     propsCreator: OxinPropsFunction,
   ) => JSX.Element;
 }) => {
-  const [formState, propsCreator] = useOxin();
+  const { inputState, inputProps } = useOxin();
 
-  return children && children(formState, propsCreator);
+  return children && children(inputState, inputProps);
 };

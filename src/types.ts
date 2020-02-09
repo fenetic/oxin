@@ -1,4 +1,4 @@
-export type UseOxin = [FormState, OxinPropsFunction];
+export type UseOxin = { inputState: InputState; inputProps: OxinPropsFunction };
 
 export type ValidatorCreator<S> = (
   settings: S,
@@ -42,7 +42,7 @@ export interface FormFields {
   [fieldName: string]: any;
 }
 
-export interface FormState {
+export interface InputState {
   readonly valid: boolean;
   readonly touched: {
     [fieldName: string]: boolean;
@@ -56,14 +56,14 @@ export interface FormState {
   readonly values: any;
 }
 
-export interface FieldOptions {
+export interface InputOptions {
   initialValue?: any;
   name: string;
   validation?: OptionsValidation;
   validators?: OptionsValidators;
 }
 
-export type OxinPropsFunction = (options: FieldOptions) => OxinProps;
+export type OxinPropsFunction = (options: InputOptions) => OxinProps;
 
 export interface ValidationProps {
   valid: boolean;

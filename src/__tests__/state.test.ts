@@ -16,29 +16,29 @@ describe('Oxin state', () => {
       result: { current },
     } = renderHook(() => useOxin());
 
-    expect(current[0]).toEqual(initialState);
+    expect(current.inputState).toEqual(initialState);
   });
 
   it('adds fields to state', async () => {
     const { result } = renderHook(() => useOxin());
 
     act(() => {
-      result.current[1]({ name: 'myField' });
-      result.current[1]({ name: 'myOtherField' });
+      result.current.inputProps({ name: 'myField' });
+      result.current.inputProps({ name: 'myOtherField' });
     });
 
     // touched, validating, values
-    expect(result.current[0].touched).toEqual({
+    expect(result.current.inputState.touched).toEqual({
       myField: false,
       myOtherField: false,
     });
 
-    expect(result.current[0].validating).toEqual({
+    expect(result.current.inputState.validating).toEqual({
       myField: false,
       myOtherField: false,
     });
 
-    expect(result.current[0].values).toEqual({
+    expect(result.current.inputState.values).toEqual({
       myField: null,
       myOtherField: null,
     });
@@ -49,12 +49,12 @@ describe('Oxin state', () => {
       const { result } = renderHook(() => useOxin());
 
       act(() => {
-        const props = result.current[1]({ name: 'myField' });
+        const props = result.current.inputProps({ name: 'myField' });
 
         props.onChange('Some value');
       });
 
-      expect(result.current[0].values.myField).toBe('Some value');
+      expect(result.current.inputState.values.myField).toBe('Some value');
     });
   });
 
@@ -63,19 +63,19 @@ describe('Oxin state', () => {
       const { result } = renderHook(() => useOxin());
 
       act(() => {
-        result.current[1]({ name: 'myField' });
+        result.current.inputProps({ name: 'myField' });
 
-        result.current[1]({
+        result.current.inputProps({
           name: 'myOtherField',
         });
       });
 
-      expect(result.current[0].values).toEqual({
+      expect(result.current.inputState.values).toEqual({
         myField: null,
         myOtherField: null,
       });
 
-      expect(result.current[0].values).toEqual({
+      expect(result.current.inputState.values).toEqual({
         myField: null,
         myOtherField: null,
       });
@@ -87,7 +87,7 @@ describe('Oxin state', () => {
     const { result, waitForNextUpdate } = renderHook(() => useOxin());
 
     await act(async () => {
-      props = result.current[1]({
+      props = result.current.inputProps({
         name: 'myField',
         validators: [
           function validator1(value: any) {
@@ -105,8 +105,8 @@ describe('Oxin state', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current[0].valid).toEqual(false);
-    expect(result.current[0].validation).toEqual({
+    expect(result.current.inputState.valid).toEqual(false);
+    expect(result.current.inputState.validation).toEqual({
       myField: {
         validator1: { message: undefined, valid: false },
         validator2: { message: 'Some validation message', valid: false },
@@ -119,8 +119,8 @@ describe('Oxin state', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current[0].valid).toEqual(false);
-    expect(result.current[0].validation).toEqual({
+    expect(result.current.inputState.valid).toEqual(false);
+    expect(result.current.inputState.validation).toEqual({
       myField: {
         validator1: { message: undefined, valid: true },
         validator2: { message: 'Some validation message', valid: false },
@@ -133,8 +133,8 @@ describe('Oxin state', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current[0].valid).toEqual(false);
-    expect(result.current[0].validation).toEqual({
+    expect(result.current.inputState.valid).toEqual(false);
+    expect(result.current.inputState.validation).toEqual({
       myField: {
         validator1: { message: undefined, valid: false },
         validator2: { message: 'Some validation message', valid: false },
@@ -147,8 +147,8 @@ describe('Oxin state', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current[0].valid).toEqual(false);
-    expect(result.current[0].validation).toEqual({
+    expect(result.current.inputState.valid).toEqual(false);
+    expect(result.current.inputState.validation).toEqual({
       myField: {
         validator1: { message: undefined, valid: false },
         validator2: { message: 'Some validation message', valid: true },
@@ -161,8 +161,8 @@ describe('Oxin state', () => {
       await waitForNextUpdate();
     });
 
-    expect(result.current[0].valid).toEqual(true);
-    expect(result.current[0].validation).toEqual({
+    expect(result.current.inputState.valid).toEqual(true);
+    expect(result.current.inputState.validation).toEqual({
       myField: {
         validator1: { message: undefined, valid: true },
         validator2: { message: 'Some validation message', valid: true },

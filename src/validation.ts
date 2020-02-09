@@ -1,5 +1,5 @@
 import {
-  FormState,
+  InputState,
   OptionsValidators,
   ValidatorFunction,
   ValidatorFunctionAsync,
@@ -7,7 +7,7 @@ import {
   ValidationState,
 } from './types';
 
-export const allFieldsValid = (state: FormState) =>
+export const allFieldsValid = (state: InputState) =>
   Object.keys(state.validation)
     .map(field => state.validation[field] as ValidationState)
     .map(validations =>
