@@ -194,6 +194,96 @@ You can include a mix of sync and async functions, and you do not need to worry 
 
 All the examples above use strings as input types, but your inputs can be any type you need them to be. For instance, you could have an input component that generates image that you run through a specialised image validator that runs asynchronously! An aim of this library is to provide flexibility to input components.
 
+## Nesting
+
+Oxin is designed to be nested, so it may help to think of input state as a collection of inputs rather than a form.
+
+Nesting is useful when you want to validate a whole group of inputs at once, or nest your root input state for _whatever_ reason.
+
+Let's see an example with a checkbox group -- _again, note that you only need to implement checkboxes like this if you want to validate the group or want your top level input state to be nested._
+
+We want to validate a collection of checkboxes to ensure at least one has been selected. Our input group here is called `favouriteMovie`, our `atLeastOne` validator runs through a `values` object and is `valid` if at least one value evaluates `true`:
+
+```jsx
+import { useOxin } from 'oxin';
+// ...
+// Create root input state
+const { inputProps } = useOxin();
+// ...
+// Render
+<CheckboxGroup
+  {...inputProps({
+    name: 'favouriteMovie',
+    validators: [[atLeastOne, 'Select one']],
+  })}
+/>;
+```
+
+Our `CheckboxGroup` component:
+
+```jsx
+import { useOxin } from 'oxin';
+
+const CheckboxGroup = ({
+  // OxinProps from the parent component.
+  onChange,
+  validation,
+}) => {
+  // Create new inputState for these checkboxes.
+  const { inputState, inputProps } = useOxin();
+
+  // Leverage `useEffect` to lift values using the parent
+  // component's `onChange` handler whenever we update
+  // our local `inputState`. You could also provide an
+  // `onChange` handler to each checkbox; the idea is
+  // that we call the parent `onChange` with our local
+  // `inputState.values` whenever our checkbox state
+  // changes.
+  useEffect(() => {
+    onChange(inputState.values);
+  }, [inputState.values]);
+
+  // You would probably supply options as props and map
+  // over them here, but this is a contrived example.
+  return (
+    <>
+      <Checkbox
+        {...inputProps({
+          name: 'jurassicPark',
+        })}
+        label="Jurassic Park"
+      />
+      <Checkbox
+        {...inputProps({
+          name: 'haroldAndKumar',
+        })}
+        label={'A Very Harold and Kumar 3D Christmas'}
+      />
+      {!validation.valid && <div>{validation.messages[0]}</div>}
+    </>
+  );
+};
+```
+
+And finally our `Checkbox` component:
+
+```jsx
+export const Checkbox = ({ label, value, onChange, name }) => {
+  return (
+    <div>
+      <input
+        id={name}
+        name={name}
+        type="checkbox"
+        checked={!!value}
+        onChange={() => onChange(!value)}
+      />
+      <label htmlFor={name}>{label}</label>
+    </div>
+  );
+};
+```
+
 # API
 
 ## `InputOptions`
