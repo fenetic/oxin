@@ -79,28 +79,49 @@ This creates a field in `inputState` and the input component is now able to upda
 }
 ```
 
-Don't worry about calling on every render, Oxin uses caching to prevent unnecessary validation and updates; although in performance-sensitive scenarios you may want to memoise your inputs as updates to form state will cause the form component to re-render.
+Don't worry about calling on every render, Oxin uses caching to prevent unnecessary validation and updates; although in performance-sensitive scenarios you may want to wrap your inputs with `React.memo` as updates to form state will cause the form component to re-render.
 
 ## Validation
 
-When you update the input with the `onChange(value)` prop, any validators passed to the props creator run over the value and input state is updated accordingly. This input will be invalid while it has an empty string as its value:
+Let's render some validation state inside our input component:
 
 ```jsx
-const required = value => value !== '';
+const Input = ({ name, onChange, validation }) => {
+  return (
+    <>
+      <input type="text" onChange={e => onChange(e.target.value)} />
++      {!validation.valid && validation.messages[0]}
+    </>
+  );
+};
+```
 
+`InputProps.validation` is an object containing `valid` state for the input and an array of any failed validator `messages`. We’re just displaying the first one here; you can map over and render each one if needed.
+
+When you update the input with the `onChange(value)` prop, any validators passed to the props creator run over the value and input state is updated accordingly...
+
+```jsx
 <Input
   {...inputProps({
     name: 'text1',
-    validators: [required],
+    validators: [[required, 'This field is required.']],
   })}
-/>;
+/>
 ```
 
-Oxin validator functions can be as simple (like above) or complex as you need. They just need to return `true` when valid or `false` when invalid.
+...and as long as `required` is dong its job, the input's `validation` props will be `valid: false` and `messages: ['This field is required.']`. You may notice the message is supplied alongside the validator function...
+
+## BYO Validator functions
+
+Oxin is not a validation library but provides the engine for running validators over inputs. Validator functions can be as simple (like above) or complex as you need. They just need to return `true` when valid or `false` when invalid.
+
+```javascript
+const required = value => value !== '';
+```
 
 **N.b. validators must be _named_ functions. If you want to use arrow functions, they must be assigned first (as in the example above.) If you want to define validators inline, use [function declarations](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function).**
 
-When validators are resolved they are added to input state, with their `valid` state and error messages.
+When validators are first resolved they are added to input state, with their `valid` state and error `messages`.
 
 You can also provide validator creators, which are useful for creating resuable validators; they are functions that take options and return validators based on those options:
 
