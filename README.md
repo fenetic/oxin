@@ -28,7 +28,9 @@ For the purpose of these examples, this is our `Input` component; `name`, `value
 
 ```jsx
 const Input = ({ name, value, onChange }) => {
-  return <input type="text" onChange={e => onChange(e.target.value)} />;
+  return (
+    <input type="text" value={value} onChange={e => onChange(e.target.value)} />
+  );
 };
 ```
 
@@ -89,7 +91,11 @@ Let's render some validation state inside our input component:
 const Input = ({ name, value, onChange, validation }) => {
   return (
     <>
-      <input type="text" value={value} onChange={e => onChange(e.target.value)} />
+      <input
+        type="text"
+        value={value}
+        onChange={e => onChange(e.target.value)}
+      />
       {!validation.valid && validation.messages[0]}
     </>
   );
@@ -186,7 +192,7 @@ You can include a mix of sync and async functions, and you do not need to worry 
 
 ## Input types
 
-All the examples above use strings as input types, but your inputs can be any type you need them to be. For instance, you could have an input component that generates  image that you run through a specialised image validator that runs asynchronously! An aim of this library is to provide flexibility to input components.
+All the examples above use strings as input types, but your inputs can be any type you need them to be. For instance, you could have an input component that generates image that you run through a specialised image validator that runs asynchronously! An aim of this library is to provide flexibility to input components.
 
 # API
 
