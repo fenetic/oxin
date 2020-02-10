@@ -109,11 +109,11 @@ When you update the input with the `onChange(value)` prop, any validators passed
 />
 ```
 
-...and as long as `required` is dong its job, the input's `validation` props will be `valid: false` and `messages: ['This field is required.']`. You may notice the message is supplied alongside the validator function...
+...and as long as `required` is doing its job, the input's `validation` props will be `valid: false` and `messages: ['This field is required.']` while the input value is an empty string. You may notice the message is supplied alongside the validator function...
 
 ## BYO Validator functions
 
-Oxin is not a validation library but provides the engine for running validators over inputs. Validator functions can be as simple (like above) or complex as you need. They just need to return `true` when valid or `false` when invalid.
+Oxin is not a validation library, but provides the engine for running validators over inputs. Validator functions can be as simple (like above) or complex as you need. They just need to return `true` when valid or `false` when invalid.
 
 ```javascript
 const required = value => value !== '';
@@ -243,13 +243,17 @@ type ValidatorTuple = [
 ];
 ```
 
-## Props
+## `InputProps`
 
 The props creator generates the following props for use with input components:
 
 ### `name: string`
 
 The name of the input as set in `InputOptions`.
+
+### `value: any`
+
+The value of the input, use this to keep your inputs in a controlled state.
 
 ### `touched: boolean`
 
