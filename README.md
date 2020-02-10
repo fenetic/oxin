@@ -90,6 +90,7 @@ const Input = ({ name, onChange, validation }) => {
   return (
     <>
       <input type="text" onChange={e => onChange(e.target.value)} />
+-
 +      {!validation.valid && validation.messages[0]}
     </>
   );
@@ -164,7 +165,7 @@ Validators can be plain functions or async, and you can even set a validation ru
   {...inputProps({
     name: 'text1',
     validators: [
-      async value => {
+      async function myNetworkValidator(value) {
         const result = await fetch(
           `/your/validation/endpoint?value=${value}`,
           value,
