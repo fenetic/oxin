@@ -24,10 +24,10 @@ Oxin was built with the following notions and ideals in mind:
 
 All you need to do to create a form is call `useOxin()` in your function component. You can make decisions about your form behaviour using the provided `inputState`, and you can add input fields to that state by calling `inputProps(options)`. The only requirement is a `name` provided in the options.
 
-For the purpose of these examples, this is our `Input` component; `name` and `onChange` are provided by Oxin:
+For the purpose of these examples, this is our `Input` component; `name`, `value` and `onChange` are provided by Oxin:
 
 ```jsx
-const Input = ({ name, onChange }) => {
+const Input = ({ name, value, onChange }) => {
   return <input type="text" onChange={e => onChange(e.target.value)} />;
 };
 ```
@@ -86,12 +86,11 @@ Don't worry about calling on every render, Oxin uses caching to prevent unnecess
 Let's render some validation state inside our input component:
 
 ```jsx
-const Input = ({ name, onChange, validation }) => {
+const Input = ({ name, value, onChange, validation }) => {
   return (
     <>
-      <input type="text" onChange={e => onChange(e.target.value)} />
--
-+      {!validation.valid && validation.messages[0]}
+      <input type="text" value={value} onChange={e => onChange(e.target.value)} />
+      {!validation.valid && validation.messages[0]}
     </>
   );
 };
@@ -187,7 +186,7 @@ You can include a mix of sync and async functions, and you do not need to worry 
 
 ## Input types
 
-All the examples above use strings as input types, but your inputs can be any type you need them to be. For instance, you could have an input component that generates and image that you run through a specialised image validator that runs asynchronously! An aim of this library is to provide flexibility to input components.
+All the examples above use strings as input types, but your inputs can be any type you need them to be. For instance, you could have an input component that generates  image that you run through a specialised image validator that runs asynchronously! An aim of this library is to provide flexibility to input components.
 
 # API
 
