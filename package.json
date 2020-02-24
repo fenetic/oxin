@@ -1,6 +1,6 @@
 {
   "name": "oxin",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "description": "React form auxiliary state hook",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
