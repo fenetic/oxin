@@ -151,7 +151,7 @@ export function useOxin(): UseOxin {
           .map(validatorName => validationState[validatorName])
           .reduce(
             (acc, curr) => ({
-              messages: !curr.valid
+              messages: !curr.valid && curr.message
                 ? [...acc.messages, curr.message]
                 : [...acc.messages],
               valid: acc.valid && curr.valid,
