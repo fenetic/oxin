@@ -1,9 +1,8 @@
 export { useOxin } from './hook';
 
 export {
+  Validator,
   ValidatorCreator,
-  ValidatorFunction,
-  ValidatorFunctionAsync,
   InputOptions,
   InputState,
   OxinProps,

@@ -22,9 +22,9 @@ describe('Oxin state', () => {
   it('adds fields to state', async () => {
     const { result } = renderHook(() => useOxin());
 
-    act(() => {
-      result.current.inputProps({ name: 'myField' });
-      result.current.inputProps({ name: 'myOtherField' });
+    await act(async () => {
+      await result.current.inputProps({ name: 'myField' });
+      await result.current.inputProps({ name: 'myOtherField' });
     });
 
     // touched, validating, values
@@ -45,10 +45,10 @@ describe('Oxin state', () => {
   });
 
   describe('onChange', () => {
-    it('updates field value', () => {
+    it('updates field value', async () => {
       const { result } = renderHook(() => useOxin());
 
-      act(() => {
+      await act(async () => {
         const props = result.current.inputProps({ name: 'myField' });
 
         props.onChange('Some value');
@@ -59,13 +59,13 @@ describe('Oxin state', () => {
   });
 
   describe('onRemove', () => {
-    it('removes a field', () => {
+    it('removes a field', async () => {
       const { result } = renderHook(() => useOxin());
 
-      act(() => {
-        result.current.inputProps({ name: 'myField' });
+      await act(async () => {
+        await result.current.inputProps({ name: 'myField' });
 
-        result.current.inputProps({
+        await result.current.inputProps({
           name: 'myOtherField',
         });
       });
@@ -82,6 +82,23 @@ describe('Oxin state', () => {
     });
   });
 
+  it('adds empty validation for field if no validators supplied', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useOxin());
+
+    await act(async () => {
+      result.current.inputProps({
+        name: 'myField',
+      });
+
+      await waitForNextUpdate();
+    });
+
+    expect(result.current.inputState.valid).toEqual(true);
+    expect(result.current.inputState.validation).toEqual({
+      myField: {},
+    });
+  });
+
   it('handles validation state changes', async () => {
     let props = {} as OxinProps;
     const { result, waitForNextUpdate } = renderHook(() => useOxin());
@@ -90,12 +107,11 @@ describe('Oxin state', () => {
       props = result.current.inputProps({
         name: 'myField',
         validators: [
-          function validator1(value: any) {
-            return !!value;
-          },
+          { name: 'validator1', test: (value: any) => !!value },
           [
-            function validator2(value: any) {
-              return value === true || value === null;
+            {
+              name: 'validator2',
+              test: (value: any) => value === true || value === null,
             },
             'Some validation message',
           ],

@@ -29,7 +29,11 @@ For the purpose of these examples, this is our `Input` component; `name`, `value
 ```jsx
 const Input = ({ name, value, onChange }) => {
   return (
-    <input type="text" value={value} onChange={e => onChange(e.target.value)} />
+    <input
+      type="text"
+      value={value}
+      onChange={(e) => onChange(e.target.value)}
+    />
   );
 };
 ```
@@ -74,14 +78,16 @@ This creates a field in `inputState` and the input component is now able to upda
   "validating": {
     "myField": false,
   },
-  "validation": {},
+  "validation": {
+    "myField": {}
+  },
   "values": {
     "myField": null,
   }
 }
 ```
 
-Don't worry about calling on every render, Oxin uses caching to prevent unnecessary validation and updates; although in performance-sensitive scenarios you may want to wrap your inputs with `React.memo` as updates to form state will cause the form component to re-render.
+Don't worry about calling on every render, Oxin uses caching to prevent unnecessary validation and updates to props; although in performance-sensitive scenarios you may want to wrap your inputs with `React.memo` as updates to form state will cause the form component to re-render.
 
 ## Validation
 
@@ -94,7 +100,7 @@ const Input = ({ name, value, onChange, validation }) => {
       <input
         type="text"
         value={value}
-        onChange={e => onChange(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
       />
       {!validation.valid && validation.messages[0]}
     </>
@@ -119,23 +125,28 @@ When you update the input with the `onChange(value)` prop, any validators passed
 
 ## BYO Validator functions
 
-Oxin is not a validation library, but provides the engine for running validators over inputs. Validator functions can be as simple (like above) or complex as you need. They just need to return `true` when valid or `false` when invalid.
+Oxin is not a validation library, but provides the engine for running validators over inputs. A validator must have a `name` and a `test` property. Validator tests can either be synchronous or asynchronous functions, or a boolean condition from external state.
+
+This is a simple synchronous function validator:
 
 ```javascript
-const required = value => value !== '';
+const required = {
+  name: 'required',
+  test: (value) => value !== '',
+};
 ```
-
-**N.b. validators must be _named_ functions. If you want to use arrow functions, they must be assigned first (as in the example above.) If you want to define validators inline, use [function declarations](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/function).**
 
 When validators are first resolved they are added to input state, with their `valid` state and error `messages`.
 
 You can also provide validator creators, which are useful for creating resuable validators; they are functions that take options and return validators based on those options:
 
 ```javascript
-const createMinLength = length =>
-  function minLength(value: string) {
+const createMinLength = (length) => ({
+  name: 'createMinLength',
+  test: (value: string) => {
     return value.length < length;
-  };
+  },
+});
 
 //...
 
@@ -169,8 +180,9 @@ Validators can be plain functions or async, and you can even set a validation ru
 <Input
   {...inputProps({
     name: 'text1',
-    validators: [
-      async function myNetworkValidator(value) {
+    validators: [{
+      name: 'myNetworkValidator',
+      test: async (value) => {
         const result = await fetch(
           `/your/validation/endpoint?value=${value}`,
           value,
@@ -296,11 +308,14 @@ Initial value for the input. Setting the initial value will run validators, but 
 
 ```javascript
 const createUniqueValidator = initialValue =>
-  function isUnique(value) {
-    if (initialValue === value) return true;
+  ({
+    name: 'uniqueValidator',
+    test: (value) => {
+      if (initialValue === value) return true;
 
-    // Or continue with validation...
-  };
+      // Or continue with validation...
+    }
+  });
 
 // ...
 

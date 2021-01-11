@@ -20,7 +20,6 @@ export const setValidation = (payload: {
   fieldName: string;
   validation: ValidationState;
   fromInitial?: boolean;
-  isFinal: boolean;
 }): SetValidationAction => {
   return {
     payload,

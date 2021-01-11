@@ -1,5 +1,6 @@
 import { useReducer, useRef } from 'react';
 import debounce from 'lodash.debounce';
+import { nanoid } from 'nanoid/non-secure';
 
 import {
   InputOptions,
@@ -7,13 +8,17 @@ import {
   ValidationProps,
   UseOxin,
   ValidationState,
-  ValidatorResult,
-  ValidatorMessage,
+  Validator,
+  ValidatorTuple,
 } from './types';
 
 import { initialState, reducer } from './reducer';
 import { setValue, removeField, setValidation } from './actions';
-import { runValidators } from './validation';
+import {
+  runValidators,
+  getBooleanValidators,
+  mergeValidators,
+} from './validation';
 
 interface Cache {
   getOrSet: (key: string, value: any) => any;
@@ -33,6 +38,7 @@ function useCache(): Cache {
   return { getOrSet, set, has, get };
 }
 
+// TODO: move to validation
 const validationEquals = (v1: ValidationState, v2: ValidationState) => {
   const stringify = (obj: ValidationState) =>
     Object.values(obj)
@@ -42,78 +48,64 @@ const validationEquals = (v1: ValidationState, v2: ValidationState) => {
   return stringify(v1) === stringify(v2);
 };
 
+const validatorsEquals = (
+  v1: (Validator | ValidatorTuple)[],
+  v2: (Validator | ValidatorTuple)[],
+) => {
+  return JSON.stringify(v1) === JSON.stringify(v2);
+};
+
 export function useOxin(): UseOxin {
   const [inputState, dispatch] = useReducer(reducer, initialState);
   const fieldCache = useCache();
 
   const inputProps = (inputOptions: InputOptions): OxinProps => {
-    const { initialValue, name, validation, validators } = inputOptions;
-    const validatorCount = validators?.length || 0;
+    const { initialValue, name, validation, validators = [] } = inputOptions;
     const cacheKeys = {
       validationProp: `${name}-validationProp`,
-      validationBatchCount: `${name}-validationBatchCount`,
-      settledValidations: `${name}-settledValidations`,
+      booleanValidators: `${name}-booleanValidators`,
+      finalValidationBatchId: `${name}-finalValidationBatchId`,
       onChange: `${name}-onChange`,
       changes: `${name}-changes`,
       onBlur: `${name}-onBlur`,
       onRemove: `${name}-onRemove`,
     };
 
-    // We're using counters to determine where we are when async validators
-    // resolve. This helps provide good 'state UX' because we can mark fields
-    // as 'validating' until all validators have run.
-    // We're tracking settled validations and validation batch count so we can
-    // update state on final validator resolution.
-    // We're tracking input changes to conditionally perform certain validation
-    // behaviours.
-    fieldCache.getOrSet(cacheKeys.settledValidations, 0);
-    fieldCache.getOrSet(cacheKeys.validationBatchCount, 0);
+    // We're tracking input changes to conditionally perform debounced
+    // validation behaviour
     fieldCache.getOrSet(cacheKeys.changes, 0);
 
-    const handleSetValidation = (
-      validatorName: string,
-      result: ValidatorResult,
-      message: ValidatorMessage,
-    ) => {
-      const settledValidations = fieldCache.get(cacheKeys.settledValidations);
+    const handleRunValidators = async (value: any) => {
+      const newBatchId = nanoid();
 
-      // Is final validator in batch?
-      if (settledValidations === validatorCount - 1) {
-        // All validators settled, one batch resolved
-        fieldCache.set(cacheKeys.settledValidations, 0);
-        fieldCache.set(
-          cacheKeys.validationBatchCount,
-          fieldCache.get(cacheKeys.validationBatchCount) - 1,
-        );
-      } else {
-        fieldCache.set(cacheKeys.settledValidations, settledValidations + 1);
-      }
+      fieldCache.set(cacheKeys.finalValidationBatchId, newBatchId);
 
-      dispatch(
-        setValidation({
-          fieldName: name,
-          validation: { [validatorName]: { valid: result, message } },
-          // Only end validation if this is the final batch (as opposed to
-          // final validator.)
-          isFinal: fieldCache.get(cacheKeys.validationBatchCount) === 0,
-        }),
-      );
-    };
-
-    const handleRunValidators = (value: any) => {
-      fieldCache.set(
-        cacheKeys.validationBatchCount,
-        fieldCache.get(cacheKeys.validationBatchCount) + 1,
-      );
       // Async execute every validator (whether or not it was defined async),
       // and set validation state for the relevant input with each result.
-      runValidators(validators || [], value, (result, validator) =>
-        handleSetValidation(
-          Array.isArray(validator) ? validator[0].name : validator.name,
-          result,
-          Array.isArray(validator) ? validator[1] : undefined,
+      // Merge cached (updated) boolean validators with original in case state
+      // updated externally.
+      const {
+        validationState,
+        batchId: completedBatchId,
+      } = await runValidators(
+        mergeValidators(
+          fieldCache.get(cacheKeys.booleanValidators) || [],
+          validators,
         ),
+        value,
+        newBatchId,
       );
+
+      if (
+        completedBatchId === fieldCache.get(cacheKeys.finalValidationBatchId)
+      ) {
+        dispatch(
+          setValidation({
+            fieldName: name,
+            validation: validationState,
+          }),
+        );
+      }
     };
 
     const handleRunValidatorsDebounced = debounce(
@@ -140,6 +132,27 @@ export function useOxin(): UseOxin {
     const validationState = inputState.validation[name] || {};
     const cachedValidation = fieldCache.get(cacheKeys.validationProp);
 
+    fieldCache.getOrSet(
+      cacheKeys.booleanValidators,
+      getBooleanValidators(validators),
+    );
+
+    // If cached boolean validators don't equal current boolean validators,
+    // we need to update validation state.
+    if (
+      !validatorsEquals(
+        getBooleanValidators(validators),
+        fieldCache.get(cacheKeys.booleanValidators),
+      )
+    ) {
+      fieldCache.set(
+        cacheKeys.booleanValidators,
+        getBooleanValidators(validators),
+      );
+
+      handleRunValidators(inputState.values[name]);
+    }
+
     // Cache transformed validation state to prevent unnecessary renders
     if (
       !cachedValidation ||
@@ -147,25 +160,23 @@ export function useOxin(): UseOxin {
     ) {
       fieldCache.set(
         cacheKeys.validationProp,
-        Object.keys(validationState)
-          .map((validatorName) => validationState[validatorName])
-          .reduce(
-            (acc, curr) => ({
-              messages:
-                !curr.valid && curr.message
-                  ? [...acc.messages, curr.message]
-                  : [...acc.messages],
-              valid: acc.valid && curr.valid,
-            }),
-            { valid: true, messages: [] } as ValidationProps,
-          ),
+        Object.values(validationState).reduce<ValidationProps>(
+          (acc, curr) => ({
+            messages:
+              !curr.valid && curr.message
+                ? [...acc.messages, curr.message]
+                : [...acc.messages],
+            valid: acc.valid && curr.valid,
+          }),
+          { valid: true, messages: [] },
+        ),
       );
     }
 
     const handleChange = fieldCache.getOrSet(
       cacheKeys.onChange,
       async (value: any) => {
-        dispatch(setValue({ name, value, validating: !!validators?.length }));
+        dispatch(setValue({ name, value, validating: !!validators.length }));
 
         fieldCache.set(
           cacheKeys.changes,
@@ -199,5 +210,5 @@ export function useOxin(): UseOxin {
     };
   };
 
-  return { inputState, inputProps: inputProps };
+  return { inputState, inputProps };
 }

@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState } from 'react';
+import React, { useRef, useEffect, useState, FunctionComponent } from 'react';
 
 import { useOxin } from '.';
 import { OxinProps, InputState, OxinPropsFunction } from './types';
@@ -44,11 +44,9 @@ export const TestInput = React.memo(function TestInput({
   );
 });
 
-export const TestMulti = ({
-  propsCreator,
-}: {
+export const TestMulti: FunctionComponent<{
   propsCreator: OxinPropsFunction;
-}) => {
+}> = ({ propsCreator }) => {
   const [fields, setFields] = useState([`field1`]);
 
   return (
@@ -80,14 +78,12 @@ export const TestMulti = ({
   );
 };
 
-export const TestForm = ({
-  children,
-}: {
+export const TestForm: FunctionComponent<{
   children: (
     inputState: InputState,
     propsCreator: OxinPropsFunction,
   ) => JSX.Element;
-}) => {
+}> = ({ children }) => {
   const { inputState, inputProps } = useOxin();
 
   return children && children(inputState, inputProps);
