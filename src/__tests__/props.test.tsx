@@ -153,15 +153,17 @@ describe('Props', () => {
       renderResult = render(<Form />);
     });
     const { getByTestId, queryByTestId } = renderResult;
-
     const input3 = getByTestId('input-test3');
 
     await act(async () => {
       await userEvent.type(input3, 'Not so valid');
     });
 
+    expect(getByTestId('valid-test1').textContent).toBe('true');
     expect(queryByTestId('validationMessages-test1')).not.toBeInTheDocument();
+    expect(getByTestId('valid-test2').textContent).toBe('false');
     expect(queryByTestId('validationMessages-test2')).not.toBeInTheDocument();
+    expect(getByTestId('valid-test3').textContent).toBe('false');
     expect(getByTestId('validationMessages-test3').textContent).toBe(
       'Too much',
     );
