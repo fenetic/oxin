@@ -2,13 +2,13 @@ import { RemoveInputAction, SetValidationAction, SetValueAction, ValidationState
 export declare const setValue: (payload: {
     name: string;
     value: any;
-    fromInitial?: boolean | undefined;
+    fromInitial?: boolean;
     validating: boolean;
 }) => SetValueAction;
 export declare const setValidation: (payload: {
     fieldName: string;
     validation: ValidationState;
-    fromInitial?: boolean | undefined;
+    fromInitial?: boolean;
     isFinal: boolean;
 }) => SetValidationAction;
 export declare const removeField: (name: string) => RemoveInputAction;

@@ -7,7 +7,10 @@ export declare type ValidatorFunction = (value: any) => ValidatorResult;
 export declare type ValidatorFunctionAsync = (value: any) => Promise<ValidatorResult>;
 export declare type ValidatorResult = boolean;
 export declare type ValidatorMessage = any;
-export declare type ValidatorTuple = [ValidatorFunction | ValidatorFunctionAsync, ValidatorMessage];
+export declare type ValidatorTuple = [
+    ValidatorFunction | ValidatorFunctionAsync,
+    ValidatorMessage
+];
 export declare type OptionsValidators = Array<ValidatorFunction | ValidatorFunctionAsync | ValidatorTuple>;
 export interface OptionsValidation {
     debounce?: number;

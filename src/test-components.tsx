@@ -36,8 +36,8 @@ export const TestInput = React.memo(function TestInput({
         type="text"
         name={name}
         data-testid={`input-${name}`}
-        onChange={e => onChange(e.target.value)}
-        onBlur={e => onBlur(e.target.value)}
+        onChange={(e) => onChange(e.target.value)}
+        onBlur={(e) => onBlur(e.target.value)}
         value={value || ''}
       />
     </div>

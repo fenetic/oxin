@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.reducer = exports.initialState = void 0;
 const types_1 = require("./types");
 const validation_1 = require("./validation");
 exports.initialState = {
@@ -9,7 +10,7 @@ exports.initialState = {
     validation: {},
     values: {},
 };
-exports.reducer = (state, action) => {
+const reducer = (state, action) => {
     switch (action.type) {
         case types_1.ActionType.SET_VALUE: {
             const { payload: { fromInitial, name, value, validating }, } = action;
@@ -35,4 +36,5 @@ exports.reducer = (state, action) => {
             return state;
     }
 };
+exports.reducer = reducer;
 //# sourceMappingURL=reducer.js.map

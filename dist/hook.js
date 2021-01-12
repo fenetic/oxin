@@ -3,6 +3,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.useOxin = void 0;
 const react_1 = require("react");
 const lodash_debounce_1 = __importDefault(require("lodash.debounce"));
 const reducer_1 = require("./reducer");
@@ -26,9 +27,8 @@ function useOxin() {
     const [inputState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
     const fieldCache = useCache();
     const inputProps = (inputOptions) => {
-        var _a, _b;
         const { initialValue, name, validation, validators } = inputOptions;
-        const validatorCount = ((_a = validators) === null || _a === void 0 ? void 0 : _a.length) || 0;
+        const validatorCount = (validators === null || validators === void 0 ? void 0 : validators.length) || 0;
         const cacheKeys = {
             validationProp: `${name}-validationProp`,
             validationBatchCount: `${name}-validationBatchCount`,
@@ -60,7 +60,7 @@ function useOxin() {
             fieldCache.set(cacheKeys.validationBatchCount, fieldCache.get(cacheKeys.validationBatchCount) + 1);
             validation_1.runValidators(validators || [], value, (result, validator) => handleSetValidation(Array.isArray(validator) ? validator[0].name : validator.name, result, Array.isArray(validator) ? validator[1] : undefined));
         };
-        const handleRunValidatorsDebounced = lodash_debounce_1.default(handleRunValidators, ((_b = validation) === null || _b === void 0 ? void 0 : _b.debounce) || 0);
+        const handleRunValidatorsDebounced = lodash_debounce_1.default(handleRunValidators, (validation === null || validation === void 0 ? void 0 : validation.debounce) || 0);
         if (!(name in inputState.values)) {
             dispatch(actions_1.setValue({
                 name,
@@ -84,10 +84,9 @@ function useOxin() {
             }), { valid: true, messages: [] }));
         }
         const handleChange = fieldCache.getOrSet(cacheKeys.onChange, async (value) => {
-            var _a, _b;
-            dispatch(actions_1.setValue({ name, value, validating: !!((_a = validators) === null || _a === void 0 ? void 0 : _a.length) }));
+            dispatch(actions_1.setValue({ name, value, validating: !!(validators === null || validators === void 0 ? void 0 : validators.length) }));
             fieldCache.set(cacheKeys.changes, fieldCache.get(cacheKeys.changes) + 1);
-            const dispatchValidators = !!((_b = validation) === null || _b === void 0 ? void 0 : _b.debounce) && fieldCache.get(cacheKeys.changes) > 1
+            const dispatchValidators = !!(validation === null || validation === void 0 ? void 0 : validation.debounce) && fieldCache.get(cacheKeys.changes) > 1
                 ? handleRunValidatorsDebounced
                 : handleRunValidators;
             dispatchValidators(value);
@@ -100,8 +99,7 @@ function useOxin() {
             validating: inputState.validating[name],
             onChange: handleChange,
             onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value) => {
-                var _a;
-                if ((_a = validation) === null || _a === void 0 ? void 0 : _a.onBlur) {
+                if (validation === null || validation === void 0 ? void 0 : validation.onBlur) {
                     handleChange(value);
                 }
             }),
