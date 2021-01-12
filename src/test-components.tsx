@@ -24,11 +24,13 @@ export const TestInput = React.memo(function TestInput({
       <span data-testid={`renderCounter-${name}`}>{renderCounter.current}</span>
       <span data-testid={`validating-${name}`}>{validating?.toString()}</span>
       <span data-testid={`valid-${name}`}>{validation?.valid.toString()}</span>
-      <span data-testid={`validationMessages-${name}`}>
-        {validation?.messages.map((msg, i) => (
-          <span key={i}>{msg}</span>
-        ))}
-      </span>
+      {!!validation?.messages.length && (
+        <span data-testid={`validationMessages-${name}`}>
+          {validation.messages.map((msg, i) => (
+            <span key={i}>{msg}</span>
+          ))}
+        </span>
+      )}
       <span data-testid={`touched-${name}`}>{touched?.toString()}</span>
       <input
         type="text"

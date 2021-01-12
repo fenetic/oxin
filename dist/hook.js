@@ -77,7 +77,7 @@ function useOxin() {
             fieldCache.set(cacheKeys.validationProp, Object.keys(validationState)
                 .map(validatorName => validationState[validatorName])
                 .reduce((acc, curr) => ({
-                messages: !curr.valid
+                messages: !curr.valid && curr.message
                     ? [...acc.messages, curr.message]
                     : [...acc.messages],
                 valid: acc.valid && curr.valid,

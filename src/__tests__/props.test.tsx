@@ -152,20 +152,21 @@ describe('Props', () => {
     await act(async () => {
       renderResult = render(<Form />);
     });
-    const { getByTestId } = renderResult;
-
+    const { getByTestId, queryByTestId } = renderResult;
     const input3 = getByTestId('input-test3');
-    const messages1 = getByTestId('validationMessages-test1');
-    const messages2 = getByTestId('validationMessages-test2');
-    const messages3 = getByTestId('validationMessages-test3');
 
     await act(async () => {
-      userEvent.type(input3, 'Not so valid');
+      await userEvent.type(input3, 'Not so valid');
     });
 
-    expect(messages1.textContent).toBe('');
-    expect(messages2.textContent).toBe('');
-    expect(messages3.textContent).toBe('Too much');
+    expect(getByTestId('valid-test1').textContent).toBe('true');
+    expect(queryByTestId('validationMessages-test1')).not.toBeInTheDocument();
+    expect(getByTestId('valid-test2').textContent).toBe('false');
+    expect(queryByTestId('validationMessages-test2')).not.toBeInTheDocument();
+    expect(getByTestId('valid-test3').textContent).toBe('false');
+    expect(getByTestId('validationMessages-test3').textContent).toBe(
+      'Too much',
+    );
   });
 
   test('validation onBlur', async () => {
@@ -200,12 +201,12 @@ describe('Props', () => {
     await act(async () => {
       renderResult = render(<Form />);
     });
-    const { getByTestId } = renderResult;
+    const { getByTestId, queryByTestId } = renderResult;
 
     const input1 = getByTestId('input-test1');
     const validating1 = getByTestId('validating-test1');
     const input4 = getByTestId('input-test4');
-    const messages4 = getByTestId('validationMessages-test4');
+    const messages4 = queryByTestId('validationMessages-test4');
     const valid4 = getByTestId('valid-test4');
     const validating4 = getByTestId('validating-test4');
 
@@ -215,7 +216,7 @@ describe('Props', () => {
     });
 
     expect(valid4.textContent).toBe('true');
-    expect(messages4.textContent).toBe('');
+    expect(messages4).not.toBeInTheDocument();
 
     act(() => {
       userEvent.type(input1, 'No validators on Frank');
@@ -223,7 +224,7 @@ describe('Props', () => {
     });
 
     expect(valid4.textContent).toBe('true');
-    expect(messages4.textContent).toBe('');
+    expect(messages4).not.toBeInTheDocument();
     expect(validating1.textContent).toBe('false');
     expect(validating4.textContent).toBe('true');
 
@@ -232,7 +233,7 @@ describe('Props', () => {
     });
 
     expect(valid4.textContent).toBe('false');
-    expect(messages4.textContent).toBe('Not today');
+    expect(messages4!.textContent).toBe('Not today');
     expect(validating4.textContent).toBe('false');
   });
 });

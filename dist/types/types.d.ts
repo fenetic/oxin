@@ -50,14 +50,14 @@ export interface ValidationProps {
     valid: boolean;
     messages: any[];
 }
-export interface OxinProps {
+export interface OxinProps<T = any> {
     name: string;
-    value?: any;
+    value?: T;
     validation?: ValidationProps;
     validating: boolean;
     touched: boolean;
-    onChange: (value: any) => void;
-    onBlur: (value: any) => void;
+    onChange: (value: T) => void;
+    onBlur: (value: T) => void;
     onRemove: () => void;
 }
 export declare enum ActionType {
