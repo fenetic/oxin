@@ -11,15 +11,15 @@ const actions_1 = require("./actions");
 const validation_1 = require("./validation");
 function useCache() {
     const cache = react_1.useRef(new Map());
-    const has = key => cache.current.has(key);
-    const get = key => cache.current.get(key);
+    const has = (key) => cache.current.has(key);
+    const get = (key) => cache.current.get(key);
     const set = (key, value) => cache.current.set(key, value);
     const getOrSet = (key, value) => has(key) ? get(key) : set(key, value) && get(key);
     return { getOrSet, set, has, get };
 }
 const validationEquals = (v1, v2) => {
     const stringify = (obj) => Object.values(obj)
-        .map(val => JSON.stringify(val))
+        .map((val) => JSON.stringify(val))
         .join('');
     return stringify(v1) === stringify(v2);
 };
@@ -75,7 +75,7 @@ function useOxin() {
         if (!cachedValidation ||
             !validationEquals(cachedValidation, validationState)) {
             fieldCache.set(cacheKeys.validationProp, Object.keys(validationState)
-                .map(validatorName => validationState[validatorName])
+                .map((validatorName) => validationState[validatorName])
                 .reduce((acc, curr) => ({
                 messages: !curr.valid && curr.message
                     ? [...acc.messages, curr.message]
