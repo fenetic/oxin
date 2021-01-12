@@ -24,8 +24,8 @@ interface Cache {
 
 function useCache(): Cache {
   const cache = useRef(new Map());
-  const has: Cache['has'] = key => cache.current.has(key);
-  const get: Cache['get'] = key => cache.current.get(key);
+  const has: Cache['has'] = (key) => cache.current.has(key);
+  const get: Cache['get'] = (key) => cache.current.get(key);
   const set: Cache['set'] = (key, value) => cache.current.set(key, value);
   const getOrSet: Cache['getOrSet'] = (key, value) =>
     has(key) ? get(key) : set(key, value) && get(key);
@@ -36,7 +36,7 @@ function useCache(): Cache {
 const validationEquals = (v1: ValidationState, v2: ValidationState) => {
   const stringify = (obj: ValidationState) =>
     Object.values(obj)
-      .map(val => JSON.stringify(val))
+      .map((val) => JSON.stringify(val))
       .join('');
 
   return stringify(v1) === stringify(v2);
@@ -148,7 +148,7 @@ export function useOxin(): UseOxin {
       fieldCache.set(
         cacheKeys.validationProp,
         Object.keys(validationState)
-          .map(validatorName => validationState[validatorName])
+          .map((validatorName) => validationState[validatorName])
           .reduce(
             (acc, curr) => ({
               messages:
