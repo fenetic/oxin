@@ -9,6 +9,5 @@ export declare const setValidation: (payload: {
     fieldName: string;
     validation: ValidationState;
     fromInitial?: boolean;
-    isFinal: boolean;
 }) => SetValidationAction;
 export declare const removeField: (name: string) => RemoveInputAction;

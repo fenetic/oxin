@@ -6,6 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.useOxin = void 0;
 const react_1 = require("react");
 const lodash_debounce_1 = __importDefault(require("lodash.debounce"));
+const non_secure_1 = require("nanoid/non-secure");
 const reducer_1 = require("./reducer");
 const actions_1 = require("./actions");
 const validation_1 = require("./validation");
@@ -23,42 +24,34 @@ const validationEquals = (v1, v2) => {
         .join('');
     return stringify(v1) === stringify(v2);
 };
+const validatorsEquals = (v1, v2) => {
+    return JSON.stringify(v1) === JSON.stringify(v2);
+};
 function useOxin() {
     const [inputState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
     const fieldCache = useCache();
     const inputProps = (inputOptions) => {
-        const { initialValue, name, validation, validators } = inputOptions;
-        const validatorCount = (validators === null || validators === void 0 ? void 0 : validators.length) || 0;
+        const { initialValue, name, validation, validators = [] } = inputOptions;
         const cacheKeys = {
             validationProp: `${name}-validationProp`,
-            validationBatchCount: `${name}-validationBatchCount`,
-            settledValidations: `${name}-settledValidations`,
+            booleanValidators: `${name}-booleanValidators`,
+            finalValidationBatchId: `${name}-finalValidationBatchId`,
             onChange: `${name}-onChange`,
             changes: `${name}-changes`,
             onBlur: `${name}-onBlur`,
             onRemove: `${name}-onRemove`,
         };
-        fieldCache.getOrSet(cacheKeys.settledValidations, 0);
-        fieldCache.getOrSet(cacheKeys.validationBatchCount, 0);
         fieldCache.getOrSet(cacheKeys.changes, 0);
-        const handleSetValidation = (validatorName, result, message) => {
-            const settledValidations = fieldCache.get(cacheKeys.settledValidations);
-            if (settledValidations === validatorCount - 1) {
-                fieldCache.set(cacheKeys.settledValidations, 0);
-                fieldCache.set(cacheKeys.validationBatchCount, fieldCache.get(cacheKeys.validationBatchCount) - 1);
+        const handleRunValidators = async (value) => {
+            const newBatchId = non_secure_1.nanoid();
+            fieldCache.set(cacheKeys.finalValidationBatchId, newBatchId);
+            const { validationState, batchId: completedBatchId, } = await validation_1.runValidators(validation_1.mergeValidators(fieldCache.get(cacheKeys.booleanValidators) || [], validators), value, newBatchId);
+            if (completedBatchId === fieldCache.get(cacheKeys.finalValidationBatchId)) {
+                dispatch(actions_1.setValidation({
+                    fieldName: name,
+                    validation: validationState,
+                }));
             }
-            else {
-                fieldCache.set(cacheKeys.settledValidations, settledValidations + 1);
-            }
-            dispatch(actions_1.setValidation({
-                fieldName: name,
-                validation: { [validatorName]: { valid: result, message } },
-                isFinal: fieldCache.get(cacheKeys.validationBatchCount) === 0,
-            }));
-        };
-        const handleRunValidators = (value) => {
-            fieldCache.set(cacheKeys.validationBatchCount, fieldCache.get(cacheKeys.validationBatchCount) + 1);
-            validation_1.runValidators(validators || [], value, (result, validator) => handleSetValidation(Array.isArray(validator) ? validator[0].name : validator.name, result, Array.isArray(validator) ? validator[1] : undefined));
         };
         const handleRunValidatorsDebounced = lodash_debounce_1.default(handleRunValidators, (validation === null || validation === void 0 ? void 0 : validation.debounce) || 0);
         if (!(name in inputState.values)) {
@@ -72,11 +65,14 @@ function useOxin() {
         }
         const validationState = inputState.validation[name] || {};
         const cachedValidation = fieldCache.get(cacheKeys.validationProp);
+        fieldCache.getOrSet(cacheKeys.booleanValidators, validation_1.getBooleanValidators(validators));
+        if (!validatorsEquals(validation_1.getBooleanValidators(validators), fieldCache.get(cacheKeys.booleanValidators))) {
+            fieldCache.set(cacheKeys.booleanValidators, validation_1.getBooleanValidators(validators));
+            handleRunValidators(inputState.values[name]);
+        }
         if (!cachedValidation ||
             !validationEquals(cachedValidation, validationState)) {
-            fieldCache.set(cacheKeys.validationProp, Object.keys(validationState)
-                .map((validatorName) => validationState[validatorName])
-                .reduce((acc, curr) => ({
+            fieldCache.set(cacheKeys.validationProp, Object.values(validationState).reduce((acc, curr) => ({
                 messages: !curr.valid && curr.message
                     ? [...acc.messages, curr.message]
                     : [...acc.messages],
@@ -84,7 +80,7 @@ function useOxin() {
             }), { valid: true, messages: [] }));
         }
         const handleChange = fieldCache.getOrSet(cacheKeys.onChange, async (value) => {
-            dispatch(actions_1.setValue({ name, value, validating: !!(validators === null || validators === void 0 ? void 0 : validators.length) }));
+            dispatch(actions_1.setValue({ name, value, validating: !!validators.length }));
             fieldCache.set(cacheKeys.changes, fieldCache.get(cacheKeys.changes) + 1);
             const dispatchValidators = !!(validation === null || validation === void 0 ? void 0 : validation.debounce) && fieldCache.get(cacheKeys.changes) > 1
                 ? handleRunValidatorsDebounced
@@ -108,7 +104,7 @@ function useOxin() {
             }),
         };
     };
-    return { inputState, inputProps: inputProps };
+    return { inputState, inputProps };
 }
 exports.useOxin = useOxin;
 //# sourceMappingURL=hook.js.map

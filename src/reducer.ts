@@ -21,7 +21,7 @@ export const reducer = (state: InputState, action: Action): InputState => {
   switch (action.type) {
     case ActionType.SET_VALUE: {
       const {
-        payload: { fromInitial, name, value, validating },
+        payload: { fromInitial, name, value },
       } = action as SetValueAction;
 
       return {
@@ -36,21 +36,21 @@ export const reducer = (state: InputState, action: Action): InputState => {
         },
         validating: {
           ...state.validating,
-          [name]: validating,
+          [name]: true,
         },
       };
     }
 
     case ActionType.SET_VALIDATION: {
       const {
-        payload: { fieldName, validation, isFinal },
+        payload: { fieldName, validation },
       } = action as SetValidationAction;
 
       const newState = {
         ...state,
         validating: {
           ...state.validating,
-          [fieldName]: !isFinal,
+          [fieldName]: false,
         },
         validation: {
           ...state.validation,

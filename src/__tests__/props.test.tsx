@@ -1,6 +1,6 @@
-import React from 'react';
-import { act } from 'react-dom/test-utils';
+import React, { useEffect, useState } from 'react';
 import {
+  act,
   render,
   cleanup,
   fireEvent,
@@ -14,12 +14,21 @@ import { InputOptions } from '../types';
 
 jest.mock('lodash.debounce', () => jest.fn((fn) => fn));
 
-const required = (value: string) => !!value && !!value.length;
-const maxLength = (value: string) => (value ? value.length <= 10 : true);
-const asyncCheck = async (value: string) => {
-  (() => new Promise((res) => setTimeout(res, 600)))();
+const required = {
+  name: 'required',
+  test: (value: string) => !!value && !!value.length,
+};
+const maxLength = {
+  name: 'maxLength',
+  test: (value: string) => (value ? value.length <= 10 : true),
+};
+const asyncCheck = {
+  name: 'asyncCheck',
+  test: async (value: string) => {
+    (() => new Promise((res) => setTimeout(res, 600)))();
 
-  return value === 'Correcto';
+    return value === 'Correcto';
+  },
 };
 
 const inputs: InputOptions[] = [
@@ -45,21 +54,56 @@ const inputs: InputOptions[] = [
       debounce: 500,
     },
   },
+  {
+    name: 'test5',
+  },
 ];
 
-const Form = () => (
-  <TestForm>
-    {(inputState, propsCreator) => (
-      <>
-        <TestInput {...propsCreator(inputs[0])} />
-        <TestInput {...propsCreator(inputs[1])} />
-        <TestInput {...propsCreator(inputs[2])} />
-        <TestInput {...propsCreator(inputs[3])} />
-        <span data-testid="allValid">{inputState.valid.toString()}</span>
-      </>
-    )}
-  </TestForm>
-);
+const Form = () => {
+  // Using this state to test the use of boolean validation tests (input5)
+  const [validationTestState, setValidationTestState] = useState(false);
+
+  useEffect(() => {
+    setValidationTestState(true);
+  }, []);
+
+  return (
+    <TestForm>
+      {(inputState, propsCreator) => {
+        return (
+          <>
+            <TestInput {...propsCreator(inputs[0])} />
+            <TestInput {...propsCreator(inputs[1])} />
+            <TestInput {...propsCreator(inputs[2])} />
+            <TestInput {...propsCreator(inputs[3])} />
+            <TestInput
+              {...propsCreator({
+                ...inputs[4],
+                validators: [
+                  [required, 'Give it some'],
+                  [
+                    {
+                      name: 'stateValidator',
+                      test: validationTestState,
+                    },
+                    'the state of that',
+                  ],
+                ],
+              })}
+            />
+            <button
+              onClick={() => setValidationTestState(!validationTestState)}
+              data-testid="test5-valid-state-toggle"
+            >
+              Toggle valid state
+            </button>
+            <span data-testid="allValid">{inputState.valid.toString()}</span>
+          </>
+        );
+      }}
+    </TestForm>
+  );
+};
 
 let renderResult = {} as RenderResult;
 
@@ -110,9 +154,9 @@ describe('Props', () => {
     const valid3 = getByTestId('valid-test3');
 
     await waitFor(async () => {
-      await userEvent.clear(input2);
+      await userEvent.clear(input3);
       await userEvent.type(input2, 'Valid');
-      await userEvent.type(input3, 'Not so valid');
+      await userEvent.type(input3, 'Not so valid', { delay: 1 });
     });
 
     expect(valid1.textContent).toBe('true');
@@ -133,24 +177,53 @@ describe('Props', () => {
     await act(async () => {
       renderResult = render(<Form />);
     });
-    const { getByTestId } = renderResult;
+    const { getByTestId, rerender } = renderResult;
 
     const input2 = getByTestId('input-test2');
     const input3 = getByTestId('input-test3');
     const input4 = getByTestId('input-test4');
+    const input5 = getByTestId('input-test5');
     const allValid = getByTestId('allValid');
 
     expect(allValid.textContent).toBe('false');
+
+    rerender(<Form />);
 
     await waitFor(async () => {
       await userEvent.type(input2, 'Valid');
       await userEvent.type(input3, 'Also valid');
       await userEvent.type(input4, 'Correcto');
+      await userEvent.type(input5, 'Hello');
 
       jest.runAllTimers();
     });
 
     expect(allValid.textContent).toBe('true');
+  });
+
+  test('external state validation', async () => {
+    await waitFor(() => {
+      renderResult = render(<Form />);
+    });
+
+    const { getByTestId } = renderResult;
+
+    expect(getByTestId('validating-test5').textContent).toBe('false');
+    expect(getByTestId('valid-test5').textContent).toBe('false');
+
+    await waitFor(async () => {
+      await userEvent.type(getByTestId('input-test5'), 'Hello');
+    });
+
+    expect(getByTestId('validating-test5').textContent).toBe('false');
+    expect(getByTestId('valid-test5').textContent).toBe('true');
+
+    await waitFor(async () => {
+      await userEvent.click(getByTestId('test5-valid-state-toggle'));
+    });
+
+    expect(getByTestId('validating-test5').textContent).toBe('false');
+    expect(getByTestId('valid-test5').textContent).toBe('false');
   });
 
   test('validationMessages', async () => {
@@ -235,7 +308,7 @@ describe('Props', () => {
 
     expect(valid4.textContent).toBe('true');
     expect(messages4).not.toBeInTheDocument();
-    expect(validating1.textContent).toBe('false');
+    expect(validating1.textContent).toBe('true');
     expect(validating4.textContent).toBe('true');
 
     await act(async () => {
@@ -244,6 +317,7 @@ describe('Props', () => {
 
     expect(valid4.textContent).toBe('false');
     expect(messages4.textContent).toBe('Not today');
+    expect(validating1.textContent).toBe('false');
     expect(validating4.textContent).toBe('false');
   });
 });

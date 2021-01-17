@@ -2,16 +2,17 @@ export declare type UseOxin = {
     inputState: InputState;
     inputProps: OxinPropsFunction;
 };
-export declare type ValidatorCreator<S> = (settings: S) => ValidatorFunction | ValidatorFunctionAsync;
+export declare type ValidatorCreator<S = any> = (settings: S) => Validator;
 export declare type ValidatorFunction = (value: any) => ValidatorResult;
 export declare type ValidatorFunctionAsync = (value: any) => Promise<ValidatorResult>;
 export declare type ValidatorResult = boolean;
 export declare type ValidatorMessage = any;
-export declare type ValidatorTuple = [
-    ValidatorFunction | ValidatorFunctionAsync,
-    ValidatorMessage
-];
-export declare type OptionsValidators = Array<ValidatorFunction | ValidatorFunctionAsync | ValidatorTuple>;
+export interface Validator {
+    name: string;
+    test: boolean | ValidatorFunction | ValidatorFunctionAsync;
+}
+export declare type ValidatorTuple = [Validator, ValidatorMessage];
+export declare type OptionsValidators = (Validator | ValidatorCreator)[];
 export interface OptionsValidation {
     debounce?: number;
     onBlur?: boolean;
@@ -46,7 +47,7 @@ export interface InputOptions {
     initialValue?: any;
     name: string;
     validation?: OptionsValidation;
-    validators?: OptionsValidators;
+    validators?: (Validator | ValidatorTuple)[];
 }
 export declare type OxinPropsFunction = (options: InputOptions) => OxinProps;
 export interface ValidationProps {
@@ -78,14 +79,12 @@ export interface SetValueAction extends BaseAction {
         name: string;
         value: any;
         fromInitial?: boolean;
-        validating: boolean;
     };
 }
 export interface SetValidationAction extends BaseAction {
     payload: {
         fieldName: string;
         validation: ValidationState;
-        isFinal: boolean;
     };
 }
 export interface RemoveInputAction extends BaseAction {
