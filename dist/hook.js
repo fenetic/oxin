@@ -31,7 +31,7 @@ function useOxin() {
     const [inputState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
     const fieldCache = useCache();
     const inputProps = (inputOptions) => {
-        const { initialValue, name, validation, validators = [] } = inputOptions;
+        const { initialValue, name, validation, validators = [], validationMessage, } = inputOptions;
         const cacheKeys = {
             validationProp: `${name}-validationProp`,
             booleanValidators: `${name}-booleanValidators`,
@@ -73,9 +73,11 @@ function useOxin() {
         if (!cachedValidation ||
             !validationEquals(cachedValidation, validationState)) {
             fieldCache.set(cacheKeys.validationProp, Object.values(validationState).reduce((acc, curr) => ({
-                messages: !curr.valid && curr.message
-                    ? [...acc.messages, curr.message]
-                    : [...acc.messages],
+                messages: !curr.valid && validationMessage
+                    ? [validationMessage]
+                    : !curr.valid && curr.message
+                        ? [...acc.messages, curr.message]
+                        : [...acc.messages],
                 valid: acc.valid && curr.valid,
             }), { valid: true, messages: [] }));
         }

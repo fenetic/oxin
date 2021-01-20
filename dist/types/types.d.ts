@@ -48,6 +48,7 @@ export interface InputOptions {
     name: string;
     validation?: OptionsValidation;
     validators?: (Validator | ValidatorTuple)[];
+    validationMessage?: any;
 }
 export declare type OxinPropsFunction = (options: InputOptions) => OxinProps;
 export interface ValidationProps {

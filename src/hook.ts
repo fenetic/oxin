@@ -60,7 +60,13 @@ export function useOxin(): UseOxin {
   const fieldCache = useCache();
 
   const inputProps = (inputOptions: InputOptions): OxinProps => {
-    const { initialValue, name, validation, validators = [] } = inputOptions;
+    const {
+      initialValue,
+      name,
+      validation,
+      validators = [],
+      validationMessage,
+    } = inputOptions;
     const cacheKeys = {
       validationProp: `${name}-validationProp`,
       booleanValidators: `${name}-booleanValidators`,
@@ -71,7 +77,7 @@ export function useOxin(): UseOxin {
       onRemove: `${name}-onRemove`,
     };
 
-    // We're tracking input changes to conditionally perform debounced
+    // We're tracking input change count to conditionally perform debounced
     // validation behaviour
     fieldCache.getOrSet(cacheKeys.changes, 0);
 
@@ -80,14 +86,12 @@ export function useOxin(): UseOxin {
 
       fieldCache.set(cacheKeys.finalValidationBatchId, newBatchId);
 
-      // Async execute every validator (whether or not it was defined async),
-      // and set validation state for the relevant input with each result.
-      // Merge cached (updated) boolean validators with original in case state
-      // updated externally.
       const {
         validationState,
         batchId: completedBatchId,
       } = await runValidators(
+        // Merge cached (fresh) boolean validators with original in case
+        // state updated externally.
         mergeValidators(
           fieldCache.get(cacheKeys.booleanValidators) || [],
           validators,
@@ -96,6 +100,7 @@ export function useOxin(): UseOxin {
         newBatchId,
       );
 
+      // Only update state after last validation batch
       if (
         completedBatchId === fieldCache.get(cacheKeys.finalValidationBatchId)
       ) {
@@ -163,7 +168,9 @@ export function useOxin(): UseOxin {
         Object.values(validationState).reduce<ValidationProps>(
           (acc, curr) => ({
             messages:
-              !curr.valid && curr.message
+              !curr.valid && validationMessage
+                ? [validationMessage]
+                : !curr.valid && curr.message
                 ? [...acc.messages, curr.message]
                 : [...acc.messages],
             valid: acc.valid && curr.valid,
