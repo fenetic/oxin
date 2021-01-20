@@ -69,6 +69,7 @@ export function useOxin(): UseOxin {
     } = inputOptions;
     const cacheKeys = {
       validationProp: `${name}-validationProp`,
+      validationState: `${name}-validationState`,
       booleanValidators: `${name}-booleanValidators`,
       finalValidationBatchId: `${name}-finalValidationBatchId`,
       onChange: `${name}-onChange`,
@@ -135,7 +136,7 @@ export function useOxin(): UseOxin {
     }
 
     const validationState = inputState.validation[name] || {};
-    const cachedValidation = fieldCache.get(cacheKeys.validationProp);
+    const cachedValidation = fieldCache.get(cacheKeys.validationState);
 
     fieldCache.getOrSet(
       cacheKeys.booleanValidators,
@@ -163,6 +164,7 @@ export function useOxin(): UseOxin {
       !cachedValidation ||
       !validationEquals(cachedValidation, validationState)
     ) {
+      fieldCache.set(cacheKeys.validationState, validationState);
       fieldCache.set(
         cacheKeys.validationProp,
         Object.values(validationState).reduce<ValidationProps>(
