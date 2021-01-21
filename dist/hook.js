@@ -31,9 +31,10 @@ function useOxin() {
     const [inputState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
     const fieldCache = useCache();
     const inputProps = (inputOptions) => {
-        const { initialValue, name, validation, validators = [] } = inputOptions;
+        const { initialValue, name, validation, validators = [], validationMessage, } = inputOptions;
         const cacheKeys = {
             validationProp: `${name}-validationProp`,
+            validationState: `${name}-validationState`,
             booleanValidators: `${name}-booleanValidators`,
             finalValidationBatchId: `${name}-finalValidationBatchId`,
             onChange: `${name}-onChange`,
@@ -50,6 +51,7 @@ function useOxin() {
                 dispatch(actions_1.setValidation({
                     fieldName: name,
                     validation: validationState,
+                    validationMessage,
                 }));
             }
         };
@@ -64,7 +66,7 @@ function useOxin() {
             handleRunValidators(initialValue);
         }
         const validationState = inputState.validation[name] || {};
-        const cachedValidation = fieldCache.get(cacheKeys.validationProp);
+        const cachedValidation = fieldCache.get(cacheKeys.validationState);
         fieldCache.getOrSet(cacheKeys.booleanValidators, validation_1.getBooleanValidators(validators));
         if (!validatorsEquals(validation_1.getBooleanValidators(validators), fieldCache.get(cacheKeys.booleanValidators))) {
             fieldCache.set(cacheKeys.booleanValidators, validation_1.getBooleanValidators(validators));
@@ -72,10 +74,13 @@ function useOxin() {
         }
         if (!cachedValidation ||
             !validationEquals(cachedValidation, validationState)) {
+            fieldCache.set(cacheKeys.validationState, validationState);
             fieldCache.set(cacheKeys.validationProp, Object.values(validationState).reduce((acc, curr) => ({
-                messages: !curr.valid && curr.message
-                    ? [...acc.messages, curr.message]
-                    : [...acc.messages],
+                messages: !curr.valid && validationMessage
+                    ? [validationMessage]
+                    : !curr.valid && curr.message
+                        ? [...acc.messages, curr.message]
+                        : [...acc.messages],
                 valid: acc.valid && curr.valid,
             }), { valid: true, messages: [] }));
         }

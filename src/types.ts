@@ -58,6 +58,14 @@ export interface InputOptions {
   name: string;
   validation?: OptionsValidation;
   validators?: (Validator | ValidatorTuple)[];
+  /**
+   * Use this option to provide a validation message that applies
+   * to _all_ validators.
+   *
+   * **WARNING** using this option will override any messages supplied
+   * alongside individual validators.
+   */
+  validationMessage?: any;
 }
 
 export type OxinPropsFunction = (options: InputOptions) => OxinProps;
@@ -102,6 +110,7 @@ export interface SetValidationAction extends BaseAction {
   payload: {
     fieldName: string;
     validation: ValidationState;
+    validationMessage?: any;
   };
 }
 

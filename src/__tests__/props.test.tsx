@@ -57,6 +57,14 @@ const inputs: InputOptions[] = [
   {
     name: 'test5',
   },
+  {
+    name: 'test6',
+    validators: [
+      [required, 'Never'],
+      [maxLength, 'Nevernevernever'],
+    ],
+    validationMessage: 'One message to rule them all',
+  },
 ];
 
 const Form = () => {
@@ -97,6 +105,7 @@ const Form = () => {
             >
               Toggle valid state
             </button>
+            <TestInput {...propsCreator(inputs[5])} />
             <span data-testid="allValid">{inputState.valid.toString()}</span>
           </>
         );
@@ -183,6 +192,7 @@ describe('Props', () => {
     const input3 = getByTestId('input-test3');
     const input4 = getByTestId('input-test4');
     const input5 = getByTestId('input-test5');
+    const input6 = getByTestId('input-test6');
     const allValid = getByTestId('allValid');
 
     expect(allValid.textContent).toBe('false');
@@ -194,6 +204,7 @@ describe('Props', () => {
       await userEvent.type(input3, 'Also valid');
       await userEvent.type(input4, 'Correcto');
       await userEvent.type(input5, 'Hello');
+      await userEvent.type(input6, 'Hi');
 
       jest.runAllTimers();
     });
@@ -226,26 +237,55 @@ describe('Props', () => {
     expect(getByTestId('valid-test5').textContent).toBe('false');
   });
 
-  test('validationMessages', async () => {
-    await act(async () => {
-      renderResult = render(<Form />);
-    });
-    const { getByTestId, queryByTestId } = renderResult;
-    const input3 = getByTestId('input-test3');
+  describe('validationMessages', () => {
+    test('returns correct messages for individual validators', async () => {
+      await act(async () => {
+        renderResult = render(<Form />);
+      });
+      const { getByTestId, queryByTestId } = renderResult;
+      const input3 = getByTestId('input-test3');
 
-    await waitFor(async () => {
-      await userEvent.clear(input3);
-      await userEvent.type(input3, 'Not so valid');
+      await waitFor(async () => {
+        await userEvent.clear(input3);
+        await userEvent.type(input3, 'Not so valid');
+      });
+
+      expect(getByTestId('valid-test1').textContent).toBe('true');
+      expect(queryByTestId('validationMessages-test1')).not.toBeInTheDocument();
+      expect(getByTestId('valid-test2').textContent).toBe('false');
+      expect(queryByTestId('validationMessages-test2')).not.toBeInTheDocument();
+      expect(getByTestId('valid-test3').textContent).toBe('false');
+      expect(getByTestId('validationMessages-test3').textContent).toBe(
+        'Too much',
+      );
     });
 
-    expect(getByTestId('valid-test1').textContent).toBe('true');
-    expect(queryByTestId('validationMessages-test1')).not.toBeInTheDocument();
-    expect(getByTestId('valid-test2').textContent).toBe('false');
-    expect(queryByTestId('validationMessages-test2')).not.toBeInTheDocument();
-    expect(getByTestId('valid-test3').textContent).toBe('false');
-    expect(getByTestId('validationMessages-test3').textContent).toBe(
-      'Too much',
-    );
+    test('returns correct message if a global `validationMessage` supplied', async () => {
+      await act(async () => {
+        renderResult = render(<Form />);
+      });
+      const { getByTestId, queryByText } = renderResult;
+      const input6 = getByTestId('input-test6');
+
+      await waitFor(async () => {
+        await userEvent.type(input6, 'in');
+        await userEvent.clear(input6);
+        await userEvent.tab();
+      });
+
+      expect(queryByText('Never')).not.toBeInTheDocument();
+      expect(queryByText('Nevernevernever')).not.toBeInTheDocument();
+      expect(queryByText('One message to rule them all')).toBeInTheDocument();
+
+      await waitFor(async () => {
+        await userEvent.clear(input6);
+        await userEvent.type(input6, 'Somethin‘ like a phenomenon');
+      });
+
+      expect(queryByText('Never')).not.toBeInTheDocument();
+      expect(queryByText('Nevernevernever')).not.toBeInTheDocument();
+      expect(queryByText('One message to rule them all')).toBeInTheDocument();
+    });
   });
 
   test('validation onBlur', async () => {
