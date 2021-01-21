@@ -302,7 +302,7 @@ export const Checkbox = ({ label, value, onChange, name }) => {
 
 You can supply the following options to the `inputProps()` props creator:
 
-### `initialValue: any`
+#### `initialValue: any`
 
 Initial value for the input. Setting the initial value will run validators, but will not mark the field as `touched`. If you need protection from re-validating against an initial value, you can do so in a validator creator with an early return:
 
@@ -326,11 +326,11 @@ inputProps({
 })
 ```
 
-### `name: string`
+#### `name: string`
 
 The name of the input field.
 
-### `validation: ValidationOptions`
+#### `validation: ValidationOptions`
 
 Options for validation behaviour:
 
@@ -338,7 +338,7 @@ Options for validation behaviour:
 
 **`onBlur?: boolean`** If this is set to `true`, validators will be executed when the `onBlur(value)` prop is called.
 
-### `validators: (ValidatorFunction | ValidatorFunctionAsync | ValidatorTuple)[]`
+#### `validators: (ValidatorFunction | ValidatorFunctionAsync | ValidatorTuple)[]`
 
 An array of validators which can be any of the following:
 
@@ -354,23 +354,27 @@ type ValidatorTuple = [
 ];
 ```
 
+#### `validationMessage: any`
+
+A “global” validation message that is applied to _all_ validators on the field. This will override any validator messages supplied in a `ValidatorTuple`.
+
 ## `InputProps`
 
 The props creator generates the following props for use with input components:
 
-### `name: string`
+#### `name: string`
 
 The name of the input as set in `InputOptions`.
 
-### `value: any`
+#### `value: any`
 
 The value of the input, use this to keep your inputs in a controlled state.
 
-### `touched: boolean`
+#### `touched: boolean`
 
 Inputs are marked as `touched` after the first `onChange` handler fires. Inputs are _not_ marked as `touched` wen providing initial values for inputs.
 
-### `validation: ValidationProps`
+#### `validation: ValidationProps`
 
 An object containing the input's validation state and any failed validator messages:
 
@@ -381,18 +385,18 @@ An object containing the input's validation state and any failed validator messa
 }
 ```
 
-### `validating: boolean`
+#### `validating: boolean`
 
 Denotes the input validator activity. `false` when _all_ validators have resolved.
 
-### `onChange: (value: any) => void`
+#### `onChange: (value: any) => void`
 
 Change handler for the input. Must be called with the input value.
 
-### `onBlur: (value: any) => void`
+#### `onBlur: (value: any) => void`
 
 A proxy function to `onChange`, fires if `validation: { onBlur: true }` is supplied in `OxinOptions`. Validations fired `onBlur` are not debounced.
 
-### `onRemove: () => void`
+#### `onRemove: () => void`
 
 A cleanup function that can be called when unmounting a component (`useEffect` return) -- needed if you are planning to create/remove inputs dynamically.
