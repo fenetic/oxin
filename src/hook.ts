@@ -109,6 +109,7 @@ export function useOxin(): UseOxin {
           setValidation({
             fieldName: name,
             validation: validationState,
+            validationMessage,
           }),
         );
       }

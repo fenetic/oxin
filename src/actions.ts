@@ -20,9 +20,24 @@ export const setValidation = (payload: {
   fieldName: string;
   validation: ValidationState;
   fromInitial?: boolean;
+  validationMessage?: any;
 }): SetValidationAction => {
   return {
-    payload,
+    payload: {
+      fieldName: payload.fieldName,
+      validation: payload.validationMessage
+        ? Object.entries(payload.validation).reduce<ValidationState>(
+            (acc, curr) => ({
+              ...acc,
+              [curr[0]]: {
+                ...curr[1],
+                message: payload.validationMessage,
+              },
+            }),
+            {},
+          )
+        : payload.validation,
+    },
     type: ActionType.SET_VALIDATION,
   };
 };

@@ -86,6 +86,7 @@ export interface SetValidationAction extends BaseAction {
     payload: {
         fieldName: string;
         validation: ValidationState;
+        validationMessage?: any;
     };
 }
 export interface RemoveInputAction extends BaseAction {

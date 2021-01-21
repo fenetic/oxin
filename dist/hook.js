@@ -51,6 +51,7 @@ function useOxin() {
                 dispatch(actions_1.setValidation({
                     fieldName: name,
                     validation: validationState,
+                    validationMessage,
                 }));
             }
         };

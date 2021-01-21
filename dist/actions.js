@@ -9,7 +9,12 @@ const setValue = (payload) => ({
 exports.setValue = setValue;
 const setValidation = (payload) => {
     return {
-        payload,
+        payload: {
+            fieldName: payload.fieldName,
+            validation: payload.validationMessage
+                ? Object.entries(payload.validation).reduce((acc, curr) => (Object.assign(Object.assign({}, acc), { [curr[0]]: Object.assign(Object.assign({}, curr[1]), { message: payload.validationMessage }) })), {})
+                : payload.validation,
+        },
         type: types_1.ActionType.SET_VALIDATION,
     };
 };

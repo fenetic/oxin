@@ -185,4 +185,35 @@ describe('Oxin state', () => {
       },
     });
   });
+
+  it('applies global validationMessage to validators in state', async () => {
+    const { result, waitForNextUpdate } = renderHook(() => useOxin());
+    const testMessage = 'This is the badger badger badger badger';
+
+    await act(async () => {
+      result.current.inputProps({
+        name: 'myField',
+        validators: [
+          { name: 'validator1', test: (value: any) => !!value },
+          [
+            {
+              name: 'validator2',
+              test: (value: any) => value === true || value === null,
+            },
+            'Some validation message that should never be applied',
+          ],
+        ],
+        validationMessage: testMessage,
+      });
+
+      await waitForNextUpdate();
+    });
+
+    expect(
+      result.current.inputState.validation?.myField?.validator1?.message,
+    ).toBe(testMessage);
+    expect(
+      result.current.inputState.validation?.myField?.validator2?.message,
+    ).toBe(testMessage);
+  });
 });
