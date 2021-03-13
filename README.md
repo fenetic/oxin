@@ -1,23 +1,21 @@
-# Oxin: no mess form state (React hook)
+# Oxin: Form state sidekick (React hook)
 
-![CI](https://github.com/Madebyfen/oxin/workflows/CI/badge.svg?branch=master) [![codecov](https://codecov.io/gh/Madebyfen/oxin/branch/master/graph/badge.svg)](https://codecov.io/gh/Madebyfen/oxin) [![npm version](https://img.shields.io/npm/v/oxin.svg?style=flat)](https://npmjs.org/package/oxin 'View this project on npm')
+![CI](https://github.com/fenetic/oxin/workflows/CI/badge.svg?branch=master) [![codecov](https://codecov.io/gh/fenetic/oxin/branch/master/graph/badge.svg)](https://codecov.io/gh/fenetic/oxin) [![npm version](https://img.shields.io/npm/v/oxin.svg?style=flat)](https://npmjs.org/package/oxin 'View this project on npm')
 
 `npm install oxin`
 
-## Another form library, huh
+## Another form library, yaaaaay!
 
-Building and managing form state can be pretty tedious; in large applications even moreso. Early decisions buying into hefty libraries that take on too much responsibility or put hard rules on how the UI is structured can reach cumbersome limits that are hard to exit from, and building your own form state solution is a chore when you have fun stuff to be doing!
-
-Oxin is a form state companion designed to make handling inputs and validation a breeze without dictating anything about your UI -- it provides you with:
+Where your form UI is your hero, Oxin is your form state sidekick. It provides you with:
 
 - The state of your input field values and validity.
 - A props creator for your input components that dynamically creates form state.
 
-Oxin was built with the following notions and ideals in mind:
+Oxin was built because:
 
 - Forms should not require a complex component tree to cope with the design of state.
-- Building form state should be declarative.
-- Inputs can be _any type_.
+- Form state should not add weight to cognitive load when building apps.
+- Data are not always string values from HTML inputs.
 - Validation can be complex and asynchronous.
 
 ## Declarative forms with components

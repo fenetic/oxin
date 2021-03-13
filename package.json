@@ -1,7 +1,7 @@
 {
   "name": "oxin",
   "version": "0.4.0",
-  "description": "React form auxiliary state hook",
+  "description": "React form sidekick",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
   "files": [
@@ -29,7 +29,7 @@
   "author": "Fen Walker <hello@madebyfen.co.uk>",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Madebyfen/oxin.git"
+    "url": "git+https://github.com/fenetic/oxin.git"
   },
   "license": "ISC",
   "dependencies": {
