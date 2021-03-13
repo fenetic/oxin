@@ -1,12 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import {
-  act,
-  render,
-  cleanup,
-  fireEvent,
-  waitFor,
-  RenderResult,
-} from '@testing-library/react';
+import { act, render, fireEvent } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
 import { TestForm, TestInput } from '../test-components';
@@ -114,33 +107,25 @@ const Form = () => {
   );
 };
 
-let renderResult = {} as RenderResult;
+// MUY IMPORTANTE: Tell jest to use real timers or all our async stuff times out.
+jest.useRealTimers();
 
 describe('Props', () => {
-  afterEach(cleanup);
-
   test('initial', async () => {
-    await act(async () => {
-      renderResult = render(<Form />);
-    });
-    const { getByTestId } = renderResult;
+    const { findByTestId } = render(<Form />);
+    const input = await findByTestId('input-test1');
 
-    expect(getByTestId('input-test1').getAttribute('value')).toBe(
-      'Initial value',
-    );
+    expect(input.getAttribute('value')).toBe('Initial value');
   });
 
   test('value', async () => {
-    await act(async () => {
-      renderResult = render(<Form />);
-    });
-    const { getByTestId } = renderResult;
-    const input1 = getByTestId('input-test1');
-    const input2 = getByTestId('input-test3');
+    const { findByTestId } = render(<Form />);
+    const testId1 = 'input-test1';
+    const testId2 = 'input-test3';
+    const input1 = await findByTestId(testId1);
+    const input2 = await findByTestId(testId2);
 
-    // Using `waitFor` in this "creative" way, in combination with `delay: 1`
-    // appears to be the only way to avoid `act` warnings and timeouts.
-    await waitFor(async () => {
+    await act(async () => {
       await userEvent.clear(input1);
       await userEvent.type(input1, 'Helo uno', { delay: 1 });
       await userEvent.type(input2, 'Helo deuxo', { delay: 1 });
@@ -151,18 +136,15 @@ describe('Props', () => {
   });
 
   test('valid', async () => {
+    const { findByTestId } = render(<Form />);
+
+    const input2 = await findByTestId('input-test2');
+    const input3 = await findByTestId('input-test3');
+    const valid1 = await findByTestId('valid-test1');
+    const valid2 = await findByTestId('valid-test2');
+    const valid3 = await findByTestId('valid-test3');
+
     await act(async () => {
-      renderResult = render(<Form />);
-    });
-    const { getByTestId } = renderResult;
-
-    const input2 = getByTestId('input-test2');
-    const input3 = getByTestId('input-test3');
-    const valid1 = getByTestId('valid-test1');
-    const valid2 = getByTestId('valid-test2');
-    const valid3 = getByTestId('valid-test3');
-
-    await waitFor(async () => {
       await userEvent.clear(input3);
       await userEvent.type(input2, 'Valid');
       await userEvent.type(input3, 'Not so valid', { delay: 1 });
@@ -172,7 +154,7 @@ describe('Props', () => {
     expect(valid2.textContent).toBe('true');
     expect(valid3.textContent).toBe('false');
 
-    await waitFor(async () => {
+    await act(async () => {
       await userEvent.clear(input3);
       await userEvent.type(input3, 'Also valid');
     });
@@ -181,94 +163,82 @@ describe('Props', () => {
   });
 
   test('allValid', async () => {
-    jest.useFakeTimers();
+    const { findByTestId } = render(<Form />);
 
-    await act(async () => {
-      renderResult = render(<Form />);
-    });
-    const { getByTestId, rerender } = renderResult;
-
-    const input2 = getByTestId('input-test2');
-    const input3 = getByTestId('input-test3');
-    const input4 = getByTestId('input-test4');
-    const input5 = getByTestId('input-test5');
-    const input6 = getByTestId('input-test6');
-    const allValid = getByTestId('allValid');
+    const input2 = await findByTestId('input-test2');
+    const input3 = await findByTestId('input-test3');
+    const input4 = await findByTestId('input-test4');
+    const input5 = await findByTestId('input-test5');
+    const input6 = await findByTestId('input-test6');
+    const allValid = await findByTestId('allValid');
 
     expect(allValid.textContent).toBe('false');
 
-    rerender(<Form />);
-
-    await waitFor(async () => {
-      await userEvent.type(input2, 'Valid');
-      await userEvent.type(input3, 'Also valid');
-      await userEvent.type(input4, 'Correcto');
-      await userEvent.type(input5, 'Hello');
-      await userEvent.type(input6, 'Hi');
-
-      jest.runAllTimers();
+    await act(async () => {
+      await userEvent.type(input2, 'Valid', { delay: 1 });
+      await userEvent.type(input3, 'Also valid', { delay: 1 });
+      await userEvent.type(input4, 'Correcto', { delay: 1 });
+      await userEvent.type(input5, 'Hello', { delay: 1 });
+      await userEvent.type(input6, 'Hi', { delay: 1 });
     });
 
     expect(allValid.textContent).toBe('true');
   });
 
   test('external state validation', async () => {
-    await waitFor(() => {
-      renderResult = render(<Form />);
+    const { findByTestId } = render(<Form />);
+    const input5 = await findByTestId('input-test5');
+    const validating5 = await findByTestId('validating-test5');
+    const valid5 = await findByTestId('valid-test5');
+    const valid5StateToggle = await findByTestId('test5-valid-state-toggle');
+
+    expect(validating5.textContent).toBe('false');
+    expect(valid5.textContent).toBe('false');
+
+    await act(async () => {
+      await userEvent.type(input5, 'Hello', { delay: 1 });
     });
 
-    const { getByTestId } = renderResult;
+    expect(validating5.textContent).toBe('false');
+    expect(valid5.textContent).toBe('true');
 
-    expect(getByTestId('validating-test5').textContent).toBe('false');
-    expect(getByTestId('valid-test5').textContent).toBe('false');
-
-    await waitFor(async () => {
-      await userEvent.type(getByTestId('input-test5'), 'Hello');
+    await act(async () => {
+      await userEvent.click(valid5StateToggle);
     });
 
-    expect(getByTestId('validating-test5').textContent).toBe('false');
-    expect(getByTestId('valid-test5').textContent).toBe('true');
-
-    await waitFor(async () => {
-      await userEvent.click(getByTestId('test5-valid-state-toggle'));
-    });
-
-    expect(getByTestId('validating-test5').textContent).toBe('false');
-    expect(getByTestId('valid-test5').textContent).toBe('false');
+    expect(validating5.textContent).toBe('false');
+    expect(valid5.textContent).toBe('false');
   });
 
   describe('validationMessages', () => {
     test('returns correct messages for individual validators', async () => {
+      const { findByTestId, getByTestId, queryByTestId } = render(<Form />);
+      const valid1 = await findByTestId('valid-test1');
+      const valid2 = await findByTestId('valid-test2');
+      const valid3 = await findByTestId('valid-test3');
+      const input3 = await findByTestId('input-test3');
+
       await act(async () => {
-        renderResult = render(<Form />);
-      });
-      const { getByTestId, queryByTestId } = renderResult;
-      const input3 = getByTestId('input-test3');
-
-      await waitFor(async () => {
         await userEvent.clear(input3);
-        await userEvent.type(input3, 'Not so valid');
+        await userEvent.type(input3, 'Not so valid', { delay: 1 });
       });
 
-      expect(getByTestId('valid-test1').textContent).toBe('true');
+      expect(valid1.textContent).toBe('true');
       expect(queryByTestId('validationMessages-test1')).not.toBeInTheDocument();
-      expect(getByTestId('valid-test2').textContent).toBe('false');
+      expect(valid2.textContent).toBe('false');
       expect(queryByTestId('validationMessages-test2')).not.toBeInTheDocument();
-      expect(getByTestId('valid-test3').textContent).toBe('false');
+      expect(valid3.textContent).toBe('false');
       expect(getByTestId('validationMessages-test3').textContent).toBe(
         'Too much',
       );
     });
 
     test('returns correct message if a global `validationMessage` supplied', async () => {
-      await act(async () => {
-        renderResult = render(<Form />);
-      });
-      const { getByTestId, queryByText } = renderResult;
-      const input6 = getByTestId('input-test6');
+      const { findByTestId, queryByText } = render(<Form />);
+      const input6 = await findByTestId('input-test6');
 
-      await waitFor(async () => {
-        await userEvent.type(input6, 'in');
+      await act(async () => {
+        await userEvent.type(input6, 'in', { delay: 1 });
         await userEvent.clear(input6);
         await userEvent.tab();
       });
@@ -277,7 +247,7 @@ describe('Props', () => {
       expect(queryByText('Nevernevernever')).not.toBeInTheDocument();
       expect(queryByText('One message to rule them all')).toBeInTheDocument();
 
-      await waitFor(async () => {
+      await act(async () => {
         await userEvent.clear(input6);
         await userEvent.type(input6, 'Somethin‘ like a phenomenon');
       });
@@ -289,20 +259,17 @@ describe('Props', () => {
   });
 
   test('validation onBlur', async () => {
+    const { findByTestId } = render(<Form />);
+
+    const input2 = await findByTestId('input-test2');
+    const input3 = await findByTestId('input-test3');
+    const messages3 = await findByTestId('validationMessages-test3');
+    const valid2 = await findByTestId('valid-test2');
+    const valid3 = await findByTestId('valid-test3');
+    const touched2 = await findByTestId('touched-test2');
+    const touched3 = await findByTestId('touched-test3');
+
     await act(async () => {
-      renderResult = render(<Form />);
-    });
-    const { getByTestId } = renderResult;
-
-    const input2 = getByTestId('input-test2');
-    const input3 = getByTestId('input-test3');
-    const messages3 = getByTestId('validationMessages-test3');
-    const valid2 = getByTestId('valid-test2');
-    const valid3 = getByTestId('valid-test3');
-    const touched2 = getByTestId('touched-test2');
-    const touched3 = getByTestId('touched-test3');
-
-    await waitFor(async () => {
       await fireEvent.blur(input2);
       await fireEvent.blur(input3);
     });
@@ -315,30 +282,26 @@ describe('Props', () => {
   });
 
   test('async validation', async () => {
-    jest.useFakeTimers();
+    const { findByTestId } = render(<Form />);
+
+    const input1 = await findByTestId('input-test1');
+    const validating1 = await findByTestId('validating-test1');
+    const input4 = await findByTestId('input-test4');
+    const messages4 = await findByTestId('validationMessages-test4');
+    const valid4 = await findByTestId('valid-test4');
+    const validating4 = await findByTestId('validating-test4');
 
     await act(async () => {
-      renderResult = render(<Form />);
-    });
-    const { getByTestId } = renderResult;
-
-    const input1 = getByTestId('input-test1');
-    const validating1 = getByTestId('validating-test1');
-    const input4 = getByTestId('input-test4');
-    const messages4 = getByTestId('validationMessages-test4');
-    const valid4 = getByTestId('valid-test4');
-    const validating4 = getByTestId('validating-test4');
-
-    await waitFor(async () => {
       await userEvent.type(input4, 'Correcto', { delay: 1 });
-
-      jest.runAllTimers();
     });
 
     expect(valid4.textContent).toBe('true');
     expect(messages4).not.toBeInTheDocument();
 
-    // Testing the "validating" state with the debounced validator (input4)
+    // Switch to fake timers so we can test "validating" state
+    // as async validator does its thing on input 4
+    jest.useFakeTimers();
+
     act(() => {
       userEvent.clear(input1);
       userEvent.clear(input4);
