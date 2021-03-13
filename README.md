@@ -2,9 +2,21 @@
 
 ![CI](https://github.com/fenetic/oxin/workflows/CI/badge.svg?branch=master) [![codecov](https://codecov.io/gh/fenetic/oxin/branch/master/graph/badge.svg)](https://codecov.io/gh/fenetic/oxin) [![npm version](https://img.shields.io/npm/v/oxin.svg?style=flat)](https://npmjs.org/package/oxin 'View this project on npm')
 
-`npm install oxin`
+`$ npm install oxin`
 
-## Another form library, yaaaaay!
+`$ yarn add oxin`
+
+`$ pnpm add oxin`
+
+```TypeScript
+const { inputState, inputProps } = useOxin();
+
+const myCoolInputProps = inputProps({ name: 'input1' });
+
+return (
+  <Input {...myCoolInputProps} />
+);
+```
 
 Where your form UI is your hero, Oxin is your form state sidekick. It provides you with:
 
@@ -18,9 +30,9 @@ Oxin was built because:
 - Data are not always string values from HTML inputs.
 - Validation can be complex and asynchronous.
 
-## Declarative forms with components
+## Creating inputs
 
-All you need to do to create a form is call `useOxin()` in your function component. You can make decisions about your form behaviour using the provided `inputState`, and you can add input fields to that state by calling `inputProps(options)`. The only requirement is a `name` provided in the options.
+To create initial form state, call `useOxin()` in your function component. You can make decisions about your form behaviour using the provided `inputState`, and you can add input fields to that state by calling `inputProps(options)`. The only requirement is a `name` provided in the options.
 
 For the purpose of these examples, this is our `Input` component; `name`, `value` and `onChange` are provided by Oxin:
 
@@ -398,3 +410,41 @@ A proxy function to `onChange`, fires if `validation: { onBlur: true }` is suppl
 #### `onRemove: () => void`
 
 A cleanup function that can be called when unmounting a component (`useEffect` return) -- needed if you are planning to create/remove inputs dynamically.
+
+## Testing
+
+Because Oxin inputs are asynchronous, your tests must account for this. This library is tested using the wonderful [React Testing Library](https://testing-library.com/docs/react-testing-library/intro/) and Jest. This guide covers these tools. For other environments, please refer to asynchronous testing guides for them.
+
+### Jest + Testing Library guide
+
+When testing HTML inputs, we recommend using the `userEvent` functions from Testing Library. You will need to tell Jest to `useRealTimers()` for Testing Library's async `userEvent.type` behaviour to work correctly.
+
+When rendering your form with Oxin inputs, use testing-library's async `findBy...` functions to select your inputs:
+
+```TypeScript
+jest.useRealTimers();
+
+test('my form', async () => {
+  const { findByTestId } = render(<MyCoolForm />);
+  const input1 = await findByTestId('input-1-testid');
+});
+```
+
+When updating HTML inputs within your test, use `userEvent.type` and wrap in an async `act` call:
+
+```TypeScript
+jest.useRealTimers();
+
+test('my form', async () => {
+  const { findByTestId } = render(<MyCoolForm />);
+  const input1 = await findByTestId('input-1-testid');
+
+  await act(async () => {
+    await userEvent.type(input1, 'Some test text', { delay: 1 });
+  })
+
+  expect(input1.getAttribute('value')).toBe('Some test text');
+});
+```
+
+Notice that we are `await`-ing the result of `userEvent.type` and supplying `{ delay: 1 }` as an option to the function to implement async behaviour as per the [Testing Library docs](https://testing-library.com/docs/ecosystem-user-event/#typeelement-text-options)
