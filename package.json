@@ -1,6 +1,6 @@
 {
   "name": "oxin",
-  "version": "0.4.1",
+  "version": "0.5.0",
   "description": "React form sidekick",
   "main": "./dist/index.js",
   "types": "./dist/types/index.d.ts",
