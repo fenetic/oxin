@@ -3,16 +3,14 @@ import debounce from 'lodash.debounce';
 import { nanoid } from 'nanoid/non-secure';
 
 import {
-  InputOptions,
-  OxinProps,
   ValidationProps,
-  UseOxin,
+  Oxin,
   ValidationState,
   Validator,
   ValidatorTuple,
 } from './types';
 
-import { initialState, reducer } from './reducer';
+import { createInitialState, OxinReducer, createReducer } from './reducer';
 import { setValue, removeField, setValidation } from './actions';
 import {
   runValidators,
@@ -39,13 +37,13 @@ function useCache(): Cache {
 }
 
 // TODO: move to validation
-const validationEquals = (v1: ValidationState, v2: ValidationState) => {
+const validationEquals = (v1?: ValidationState, v2?: ValidationState) => {
   const stringify = (obj: ValidationState) =>
     Object.values(obj)
       .map((val) => JSON.stringify(val))
       .join('');
 
-  return stringify(v1) === stringify(v2);
+  return !v1 || !v2 ? false : stringify(v1) === stringify(v2);
 };
 
 const validatorsEquals = (
@@ -55,11 +53,14 @@ const validatorsEquals = (
   return JSON.stringify(v1) === JSON.stringify(v2);
 };
 
-export function useOxin(): UseOxin {
-  const [inputState, dispatch] = useReducer(reducer, initialState);
+export function useOxin<Inputs>(): Oxin<Inputs> {
+  const [inputState, dispatch] = useReducer<OxinReducer<Inputs>>(
+    createReducer<Inputs>(),
+    createInitialState<Inputs>(),
+  );
   const fieldCache = useCache();
 
-  const inputProps = (inputOptions: InputOptions): OxinProps => {
+  const inputProps: Oxin<Inputs>['inputProps'] = (inputOptions) => {
     const {
       initialValue,
       name,
@@ -168,7 +169,9 @@ export function useOxin(): UseOxin {
       fieldCache.set(cacheKeys.validationState, validationState);
       fieldCache.set(
         cacheKeys.validationProp,
-        Object.values(validationState).reduce<ValidationProps>(
+        Object.values(
+          validationState as ValidationState,
+        ).reduce<ValidationProps>(
           (acc, curr) => ({
             messages:
               !curr.valid && validationMessage
@@ -205,9 +208,9 @@ export function useOxin(): UseOxin {
     return {
       name,
       value: inputState.values[name],
-      touched: inputState.touched[name],
+      touched: !!inputState.touched[name],
       validation: fieldCache.get(cacheKeys.validationProp),
-      validating: inputState.validating[name],
+      validating: !!inputState.validating[name],
       onChange: handleChange,
       onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value: any) => {
         if (validation?.onBlur) {

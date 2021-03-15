@@ -8,9 +8,9 @@ import {
 /**
  * Verify all fields in validation state are valid
  */
-export const allFieldsValid = (state: InputState): boolean =>
+export const allFieldsValid = <Inputs>(state: InputState<Inputs>): boolean =>
   Object.keys(state.validation)
-    .map((field) => state.validation[field] as ValidationState)
+    .map((field) => state.validation[field as keyof Inputs] as ValidationState)
     .map((validations) =>
       Object.keys(validations).map((key) => validations[key].valid),
     )

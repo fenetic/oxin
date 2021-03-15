@@ -1,3 +1,5 @@
+import { Reducer } from 'react';
+
 import {
   Action,
   ActionType,
@@ -9,22 +11,30 @@ import {
 
 import { allFieldsValid } from './validation';
 
-export const initialState: InputState = {
+export const createInitialState = <Inputs>(): InputState<Inputs> => ({
   touched: {},
   valid: true,
   validating: {},
   validation: {},
   values: {},
-};
+});
 
-export const reducer = (state: InputState, action: Action): InputState => {
+export type OxinReducer<Inputs> = (
+  state: InputState<Inputs>,
+  action: Action<Inputs>,
+) => InputState<Inputs>;
+
+export const createReducer = <Inputs>(): Reducer<
+  InputState<Inputs>,
+  Action<Inputs>
+> => (state, action) => {
   switch (action.type) {
     case ActionType.SET_VALUE: {
       const {
         payload: { fromInitial, name, value },
-      } = action as SetValueAction;
+      } = action as SetValueAction<keyof Inputs, unknown>;
 
-      return {
+      const newState: InputState<Inputs> = {
         ...state,
         touched: {
           ...state.touched,
@@ -39,14 +49,16 @@ export const reducer = (state: InputState, action: Action): InputState => {
           [name]: true,
         },
       };
+
+      return newState;
     }
 
     case ActionType.SET_VALIDATION: {
       const {
         payload: { fieldName, validation },
-      } = action as SetValidationAction;
+      } = action as SetValidationAction<keyof Inputs>;
 
-      const newState = {
+      const newState: InputState<Inputs> = {
         ...state,
         validating: {
           ...state.validating,
@@ -69,16 +81,16 @@ export const reducer = (state: InputState, action: Action): InputState => {
     case ActionType.REMOVE_FIELD: {
       const {
         payload: { name },
-      } = action as RemoveInputAction;
+      } = action as RemoveInputAction<keyof Inputs>;
 
       const newState = {
         ...state,
       };
 
-      delete newState.touched[name];
-      delete newState.validation[name];
-      delete newState.values[name];
-      delete newState.validating[name];
+      delete newState.touched[name as keyof Inputs];
+      delete newState.validation[name as keyof Inputs];
+      delete newState.values[name as keyof Inputs];
+      delete newState.validating[name as keyof Inputs];
 
       newState.valid = allFieldsValid(newState);
 

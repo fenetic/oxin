@@ -1,20 +1,22 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.reducer = exports.initialState = void 0;
+exports.createReducer = exports.createInitialState = void 0;
 const types_1 = require("./types");
 const validation_1 = require("./validation");
-exports.initialState = {
+const createInitialState = () => ({
     touched: {},
     valid: true,
     validating: {},
     validation: {},
     values: {},
-};
-const reducer = (state, action) => {
+});
+exports.createInitialState = createInitialState;
+const createReducer = () => (state, action) => {
     switch (action.type) {
         case types_1.ActionType.SET_VALUE: {
             const { payload: { fromInitial, name, value }, } = action;
-            return Object.assign(Object.assign({}, state), { touched: Object.assign(Object.assign({}, state.touched), { [name]: !fromInitial }), values: Object.assign(Object.assign({}, state.values), { [name]: value }), validating: Object.assign(Object.assign({}, state.validating), { [name]: true }) });
+            const newState = Object.assign(Object.assign({}, state), { touched: Object.assign(Object.assign({}, state.touched), { [name]: !fromInitial }), values: Object.assign(Object.assign({}, state.values), { [name]: value }), validating: Object.assign(Object.assign({}, state.validating), { [name]: true }) });
+            return newState;
         }
         case types_1.ActionType.SET_VALIDATION: {
             const { payload: { fieldName, validation }, } = action;
@@ -36,5 +38,5 @@ const reducer = (state, action) => {
             return state;
     }
 };
-exports.reducer = reducer;
+exports.createReducer = createReducer;
 //# sourceMappingURL=reducer.js.map

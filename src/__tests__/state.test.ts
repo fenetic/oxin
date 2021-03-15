@@ -2,16 +2,20 @@ import { act, renderHook } from '@testing-library/react-hooks';
 
 import { useOxin } from '../hook';
 import { OxinProps } from '../types';
-import { initialState, reducer } from '../reducer';
+import { createInitialState, createReducer } from '../reducer';
 
 describe('Oxin state', () => {
   it('reducer returns default state', () => {
+    const reducer = createReducer();
+    const initialState = createInitialState();
+
     expect(reducer(initialState, { type: 'SOME_ACTION' } as any)).toEqual(
       initialState,
     );
   });
 
   it('useOxin returns initial state', () => {
+    const initialState = createInitialState();
     const {
       result: { current },
     } = renderHook(() => useOxin());
@@ -20,7 +24,9 @@ describe('Oxin state', () => {
   });
 
   it('adds fields to state', async () => {
-    const { result } = renderHook(() => useOxin());
+    const { result } = renderHook(() =>
+      useOxin<{ myField: unknown; myOtherField: unknown }>(),
+    );
 
     await act(async () => {
       await result.current.inputProps({ name: 'myField' });
@@ -46,10 +52,12 @@ describe('Oxin state', () => {
 
   describe('onChange', () => {
     it('updates field value', async () => {
-      const { result } = renderHook(() => useOxin());
+      const { result } = renderHook(() => useOxin<{ myField: string }>());
 
       await act(async () => {
-        const props = result.current.inputProps({ name: 'myField' });
+        const props = result.current.inputProps({
+          name: 'myField',
+        });
 
         props.onChange('Some value');
       });
@@ -60,7 +68,9 @@ describe('Oxin state', () => {
 
   describe('onRemove', () => {
     it('removes a field', async () => {
-      const { result } = renderHook(() => useOxin());
+      const { result } = renderHook(() =>
+        useOxin<{ myField: unknown; myOtherField: unknown }>(),
+      );
 
       await act(async () => {
         await result.current.inputProps({ name: 'myField' });
@@ -83,7 +93,9 @@ describe('Oxin state', () => {
   });
 
   it('adds empty validation for field if no validators supplied', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useOxin());
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useOxin<{ myField: unknown }>(),
+    );
 
     await act(async () => {
       result.current.inputProps({
@@ -101,7 +113,9 @@ describe('Oxin state', () => {
 
   it('handles validation state changes', async () => {
     let props = {} as OxinProps;
-    const { result, waitForNextUpdate } = renderHook(() => useOxin());
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useOxin<{ myField: string }>(),
+    );
 
     await act(async () => {
       props = result.current.inputProps({
@@ -187,7 +201,9 @@ describe('Oxin state', () => {
   });
 
   it('applies global validationMessage to validators in state', async () => {
-    const { result, waitForNextUpdate } = renderHook(() => useOxin());
+    const { result, waitForNextUpdate } = renderHook(() =>
+      useOxin<{ myField: string }>(),
+    );
     const testMessage = 'This is the badger badger badger badger';
 
     await act(async () => {
@@ -209,11 +225,9 @@ describe('Oxin state', () => {
       await waitForNextUpdate();
     });
 
-    expect(
-      result.current.inputState.validation?.myField?.validator1?.message,
-    ).toBe(testMessage);
-    expect(
-      result.current.inputState.validation?.myField?.validator2?.message,
-    ).toBe(testMessage);
+    const { validation } = result.current.inputState;
+
+    expect(validation.myField?.validator1?.message).toBe(testMessage);
+    expect(validation.myField?.validator2?.message).toBe(testMessage);
   });
 });

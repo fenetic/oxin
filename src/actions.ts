@@ -6,22 +6,22 @@ import {
   ValidationState,
 } from './types';
 
-export const setValue = (payload: {
-  name: string;
-  value: any;
+export const setValue = <K, T>(payload: {
+  name: K;
+  value: T;
   fromInitial?: boolean;
   validating: boolean;
-}): SetValueAction => ({
+}): SetValueAction<K, T> => ({
   payload,
   type: ActionType.SET_VALUE,
 });
 
-export const setValidation = (payload: {
-  fieldName: string;
+export const setValidation = <K>(payload: {
+  fieldName: K;
   validation: ValidationState;
   fromInitial?: boolean;
   validationMessage?: any;
-}): SetValidationAction => {
+}): SetValidationAction<K> => {
   return {
     payload: {
       fieldName: payload.fieldName,
@@ -42,7 +42,7 @@ export const setValidation = (payload: {
   };
 };
 
-export const removeField = (name: string): RemoveInputAction => ({
+export const removeField = <K>(name: K): RemoveInputAction<K> => ({
   payload: {
     name,
   },

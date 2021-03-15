@@ -1,14 +1,14 @@
 import { RemoveInputAction, SetValidationAction, SetValueAction, ValidationState } from './types';
-export declare const setValue: (payload: {
-    name: string;
-    value: any;
-    fromInitial?: boolean;
+export declare const setValue: <K, T>(payload: {
+    name: K;
+    value: T;
+    fromInitial?: boolean | undefined;
     validating: boolean;
-}) => SetValueAction;
-export declare const setValidation: (payload: {
-    fieldName: string;
+}) => SetValueAction<K, T>;
+export declare const setValidation: <K>(payload: {
+    fieldName: K;
     validation: ValidationState;
-    fromInitial?: boolean;
+    fromInitial?: boolean | undefined;
     validationMessage?: any;
-}) => SetValidationAction;
-export declare const removeField: (name: string) => RemoveInputAction;
+}) => SetValidationAction<K>;
+export declare const removeField: <K>(name: K) => RemoveInputAction<K>;

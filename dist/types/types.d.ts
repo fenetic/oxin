@@ -1,7 +1,23 @@
-export declare type UseOxin = {
-    inputState: InputState;
-    inputProps: OxinPropsFunction;
+export declare type Oxin<Inputs> = {
+    inputState: InputState<Inputs>;
+    inputProps: <K extends keyof Inputs>(options: InputOptions<K, Inputs[K]>) => OxinProps<K, Inputs[K]>;
 };
+export interface InputState<Inputs> {
+    valid: boolean;
+    touched: Partial<Record<keyof Inputs, boolean>>;
+    validation: Partial<Record<keyof Inputs, ValidationState | undefined>>;
+    validating: Partial<Record<keyof Inputs, boolean | undefined>>;
+    values: Partial<{
+        [K in keyof Inputs]: Inputs[K];
+    }>;
+}
+export interface InputOptions<K, T> {
+    initialValue?: T;
+    name: K;
+    validation?: OptionsValidation;
+    validators?: (Validator | ValidatorTuple)[];
+    validationMessage?: any;
+}
 export declare type ValidatorCreator<S = any> = (settings: S) => Validator;
 export declare type ValidatorFunction = (value: any) => ValidatorResult;
 export declare type ValidatorFunctionAsync = (value: any) => Promise<ValidatorResult>;
@@ -30,33 +46,12 @@ export interface ValidatingState {
 export interface FormFields {
     [fieldName: string]: any;
 }
-export interface InputState {
-    readonly valid: boolean;
-    readonly touched: {
-        [fieldName: string]: boolean;
-    };
-    readonly validation: {
-        [fieldName: string]: ValidationState | undefined;
-    };
-    readonly validating: {
-        [fieldName: string]: boolean;
-    };
-    readonly values: any;
-}
-export interface InputOptions {
-    initialValue?: any;
-    name: string;
-    validation?: OptionsValidation;
-    validators?: (Validator | ValidatorTuple)[];
-    validationMessage?: any;
-}
-export declare type OxinPropsFunction = (options: InputOptions) => OxinProps;
 export interface ValidationProps {
     valid: boolean;
     messages: any[];
 }
-export interface OxinProps<T = any> {
-    name: string;
+export interface OxinProps<K = string, T = any> {
+    name: K;
     value?: T;
     validation?: ValidationProps;
     validating: boolean;
@@ -75,23 +70,23 @@ export declare enum ActionType {
 export interface BaseAction {
     type: ActionType;
 }
-export interface SetValueAction extends BaseAction {
+export interface SetValueAction<K, T> extends BaseAction {
     payload: {
-        name: string;
-        value: any;
+        name: K;
+        value: T;
         fromInitial?: boolean;
     };
 }
-export interface SetValidationAction extends BaseAction {
+export interface SetValidationAction<K> extends BaseAction {
     payload: {
-        fieldName: string;
+        fieldName: K;
         validation: ValidationState;
-        validationMessage?: any;
+        validationMessage?: unknown;
     };
 }
-export interface RemoveInputAction extends BaseAction {
+export interface RemoveInputAction<K> extends BaseAction {
     payload: {
-        name: string;
+        name: K;
     };
 }
-export declare type Action = SetValueAction | SetValidationAction | RemoveInputAction;
+export declare type Action<Inputs> = SetValueAction<keyof Inputs, unknown> | SetValidationAction<keyof Inputs> | RemoveInputAction<keyof Inputs>;

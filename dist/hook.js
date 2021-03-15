@@ -22,13 +22,13 @@ const validationEquals = (v1, v2) => {
     const stringify = (obj) => Object.values(obj)
         .map((val) => JSON.stringify(val))
         .join('');
-    return stringify(v1) === stringify(v2);
+    return !v1 || !v2 ? false : stringify(v1) === stringify(v2);
 };
 const validatorsEquals = (v1, v2) => {
     return JSON.stringify(v1) === JSON.stringify(v2);
 };
 function useOxin() {
-    const [inputState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
+    const [inputState, dispatch] = react_1.useReducer(reducer_1.createReducer(), reducer_1.createInitialState());
     const fieldCache = useCache();
     const inputProps = (inputOptions) => {
         const { initialValue, name, validation, validators = [], validationMessage, } = inputOptions;
@@ -95,9 +95,9 @@ function useOxin() {
         return {
             name,
             value: inputState.values[name],
-            touched: inputState.touched[name],
+            touched: !!inputState.touched[name],
             validation: fieldCache.get(cacheKeys.validationProp),
-            validating: inputState.validating[name],
+            validating: !!inputState.validating[name],
             onChange: handleChange,
             onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value) => {
                 if (validation === null || validation === void 0 ? void 0 : validation.onBlur) {
