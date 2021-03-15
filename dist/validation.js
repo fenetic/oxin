@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.runValidators = exports.mergeValidators = exports.getBooleanValidators = exports.allFieldsValid = exports.validatorsEquals = exports.validationEquals = void 0;
+exports.runValidators = exports.mergeValidators = exports.getValidatorName = exports.getBooleanValidators = exports.allFieldsValid = exports.validatorsEquals = exports.validationEquals = void 0;
 const validationEquals = (v1, v2) => {
     const stringify = (obj) => Object.values(obj)
         .map((val) => JSON.stringify(val))
@@ -26,12 +26,13 @@ const getBooleanValidators = (validators) => validators.reduce((validators, vali
         : validators;
 }, []);
 exports.getBooleanValidators = getBooleanValidators;
-const getValidatorName = (validator) => Array.isArray(validator) ? validator[0].name : validator.name;
+const getValidatorName = (validator) => (Array.isArray(validator) ? validator[0].name : validator.name);
+exports.getValidatorName = getValidatorName;
 const mergeValidators = (merge, into) => {
     const intoFiltered = merge.length
         ? into.filter((validator) => merge
-            .map(getValidatorName)
-            .some((validatorName) => validatorName !== getValidatorName(validator)))
+            .map(exports.getValidatorName)
+            .some((validatorName) => validatorName !== exports.getValidatorName(validator)))
         : into;
     const merged = [...intoFiltered, ...merge];
     return merged;
