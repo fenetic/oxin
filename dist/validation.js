@@ -1,6 +1,17 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.runValidators = exports.mergeValidators = exports.getBooleanValidators = exports.allFieldsValid = void 0;
+exports.runValidators = exports.mergeValidators = exports.getBooleanValidators = exports.allFieldsValid = exports.validatorsEquals = exports.validationEquals = void 0;
+const validationEquals = (v1, v2) => {
+    const stringify = (obj) => Object.values(obj)
+        .map((val) => JSON.stringify(val))
+        .join('');
+    return !v1 || !v2 ? false : stringify(v1) === stringify(v2);
+};
+exports.validationEquals = validationEquals;
+const validatorsEquals = (v1, v2) => {
+    return JSON.stringify(v1) === JSON.stringify(v2);
+};
+exports.validatorsEquals = validatorsEquals;
 const allFieldsValid = (state) => Object.keys(state.validation)
     .map((field) => state.validation[field])
     .map((validations) => Object.keys(validations).map((key) => validations[key].valid))

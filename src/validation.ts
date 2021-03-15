@@ -5,6 +5,26 @@ import {
   ValidatorTuple,
 } from './types';
 
+// TODO: move to validation
+export const validationEquals = (
+  v1?: ValidationState,
+  v2?: ValidationState,
+): boolean => {
+  const stringify = (obj: ValidationState) =>
+    Object.values(obj)
+      .map((val) => JSON.stringify(val))
+      .join('');
+
+  return !v1 || !v2 ? false : stringify(v1) === stringify(v2);
+};
+
+export const validatorsEquals = (
+  v1: (Validator | ValidatorTuple)[],
+  v2: (Validator | ValidatorTuple)[],
+): boolean => {
+  return JSON.stringify(v1) === JSON.stringify(v2);
+};
+
 /**
  * Verify all fields in validation state are valid
  */
