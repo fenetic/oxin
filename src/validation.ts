@@ -54,8 +54,9 @@ export const getBooleanValidators = (
 /**
  * Get a name for a validator.
  */
-const getValidatorName = (validator: Validator | ValidatorTuple) =>
-  Array.isArray(validator) ? validator[0].name : validator.name;
+export const getValidatorName = (
+  validator: Validator | ValidatorTuple,
+): string => (Array.isArray(validator) ? validator[0].name : validator.name);
 
 /**
  * Merges an array of validators into another.
@@ -103,7 +104,7 @@ const runValidator = async (
 
 export const runValidators = async (
   validators: (Validator | ValidatorTuple)[],
-  value: any,
+  value: unknown,
   batchId: string,
 ): Promise<{ validationState: ValidationState; batchId: string }> => {
   const resolved = await Promise.all(
