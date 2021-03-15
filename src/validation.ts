@@ -5,12 +5,32 @@ import {
   ValidatorTuple,
 } from './types';
 
+// TODO: move to validation
+export const validationEquals = (
+  v1?: ValidationState,
+  v2?: ValidationState,
+): boolean => {
+  const stringify = (obj: ValidationState) =>
+    Object.values(obj)
+      .map((val) => JSON.stringify(val))
+      .join('');
+
+  return !v1 || !v2 ? false : stringify(v1) === stringify(v2);
+};
+
+export const validatorsEquals = (
+  v1: (Validator | ValidatorTuple)[],
+  v2: (Validator | ValidatorTuple)[],
+): boolean => {
+  return JSON.stringify(v1) === JSON.stringify(v2);
+};
+
 /**
  * Verify all fields in validation state are valid
  */
-export const allFieldsValid = (state: InputState): boolean =>
+export const allFieldsValid = <Inputs>(state: InputState<Inputs>): boolean =>
   Object.keys(state.validation)
-    .map((field) => state.validation[field] as ValidationState)
+    .map((field) => state.validation[field as keyof Inputs] as ValidationState)
     .map((validations) =>
       Object.keys(validations).map((key) => validations[key].valid),
     )
@@ -34,8 +54,9 @@ export const getBooleanValidators = (
 /**
  * Get a name for a validator.
  */
-const getValidatorName = (validator: Validator | ValidatorTuple) =>
-  Array.isArray(validator) ? validator[0].name : validator.name;
+export const getValidatorName = (
+  validator: Validator | ValidatorTuple,
+): string => (Array.isArray(validator) ? validator[0].name : validator.name);
 
 /**
  * Merges an array of validators into another.
@@ -83,7 +104,7 @@ const runValidator = async (
 
 export const runValidators = async (
   validators: (Validator | ValidatorTuple)[],
-  value: any,
+  value: unknown,
   batchId: string,
 ): Promise<{ validationState: ValidationState; batchId: string }> => {
   const resolved = await Promise.all(

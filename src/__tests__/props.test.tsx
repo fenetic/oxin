@@ -24,7 +24,7 @@ const asyncCheck = {
   },
 };
 
-const inputs: InputOptions[] = [
+const inputs: InputOptions<string, string>[] = [
   { name: 'test1', initialValue: 'Initial value' },
   {
     name: 'test2',

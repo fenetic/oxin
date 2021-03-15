@@ -18,17 +18,8 @@ function useCache() {
     const getOrSet = (key, value) => has(key) ? get(key) : set(key, value) && get(key);
     return { getOrSet, set, has, get };
 }
-const validationEquals = (v1, v2) => {
-    const stringify = (obj) => Object.values(obj)
-        .map((val) => JSON.stringify(val))
-        .join('');
-    return stringify(v1) === stringify(v2);
-};
-const validatorsEquals = (v1, v2) => {
-    return JSON.stringify(v1) === JSON.stringify(v2);
-};
 function useOxin() {
-    const [inputState, dispatch] = react_1.useReducer(reducer_1.reducer, reducer_1.initialState);
+    const [inputState, dispatch] = react_1.useReducer(reducer_1.createReducer(), reducer_1.createInitialState());
     const fieldCache = useCache();
     const inputProps = (inputOptions) => {
         const { initialValue, name, validation, validators = [], validationMessage, } = inputOptions;
@@ -68,12 +59,12 @@ function useOxin() {
         const validationState = inputState.validation[name] || {};
         const cachedValidation = fieldCache.get(cacheKeys.validationState);
         fieldCache.getOrSet(cacheKeys.booleanValidators, validation_1.getBooleanValidators(validators));
-        if (!validatorsEquals(validation_1.getBooleanValidators(validators), fieldCache.get(cacheKeys.booleanValidators))) {
+        if (!validation_1.validatorsEquals(validation_1.getBooleanValidators(validators), fieldCache.get(cacheKeys.booleanValidators))) {
             fieldCache.set(cacheKeys.booleanValidators, validation_1.getBooleanValidators(validators));
             handleRunValidators(inputState.values[name]);
         }
         if (!cachedValidation ||
-            !validationEquals(cachedValidation, validationState)) {
+            !validation_1.validationEquals(cachedValidation, validationState)) {
             fieldCache.set(cacheKeys.validationState, validationState);
             fieldCache.set(cacheKeys.validationProp, Object.values(validationState).reduce((acc, curr) => ({
                 messages: !curr.valid && validationMessage
@@ -95,9 +86,9 @@ function useOxin() {
         return {
             name,
             value: inputState.values[name],
-            touched: inputState.touched[name],
+            touched: !!inputState.touched[name],
             validation: fieldCache.get(cacheKeys.validationProp),
-            validating: inputState.validating[name],
+            validating: !!inputState.validating[name],
             onChange: handleChange,
             onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value) => {
                 if (validation === null || validation === void 0 ? void 0 : validation.onBlur) {

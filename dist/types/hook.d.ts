@@ -1,2 +1,2 @@
-import { UseOxin } from './types';
-export declare function useOxin(): UseOxin;
+import { Oxin } from './types';
+export declare function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs>;
