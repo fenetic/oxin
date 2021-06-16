@@ -165,6 +165,15 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       );
     }
 
+    const runValidatorDispatch = (value: any) => {
+      const dispatchValidators =
+          !!validation?.debounce && fieldCache.get(cacheKeys.changes) > 1
+            ? handleRunValidatorsDebounced
+            : handleRunValidators;
+
+        dispatchValidators(value);
+    }
+
     const handleChange = fieldCache.getOrSet(
       cacheKeys.onChange,
       async (value: any) => {
@@ -174,13 +183,6 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
           cacheKeys.changes,
           fieldCache.get(cacheKeys.changes) + 1,
         );
-
-        const dispatchValidators =
-          !!validation?.debounce && fieldCache.get(cacheKeys.changes) > 1
-            ? handleRunValidatorsDebounced
-            : handleRunValidators;
-
-        dispatchValidators(value);
       },
     );
 
@@ -190,10 +192,17 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       touched: !!inputState.touched[name],
       validation: fieldCache.get(cacheKeys.validationProp),
       validating: !!inputState.validating[name],
-      onChange: handleChange,
+      onChange: (value) => {
+        handleChange(value);
+        
+        if (!validation?.onBlur) {
+          runValidatorDispatch(value)
+        }
+      },
       onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value: any) => {
         if (validation?.onBlur) {
           handleChange(value);
+          runValidatorDispatch(value)
         }
       }),
       onRemove: fieldCache.getOrSet(cacheKeys.onRemove, () => {
