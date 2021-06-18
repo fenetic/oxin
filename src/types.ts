@@ -53,6 +53,7 @@ export interface VisibilityCallbackProps {
   touched: boolean;
   blurred: boolean;
   currentFocussed: string | null;
+  isFocussed: boolean;
   validation: ValidationProps;
 }
 

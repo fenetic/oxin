@@ -198,6 +198,7 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       touched,
       validation: thisValidation,
       currentFocussed: inputState.focussed as string,
+      isFocussed: inputState.focussed === name,
       blurred: !!inputState.blurred[name]
     })
 
