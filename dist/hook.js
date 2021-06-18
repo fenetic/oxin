@@ -10,6 +10,7 @@ const non_secure_1 = require("nanoid/non-secure");
 const reducer_1 = require("./reducer");
 const actions_1 = require("./actions");
 const validation_1 = require("./validation");
+const visibility_1 = require("./visibility");
 function useCache() {
     const cache = react_1.useRef(new Map());
     const has = (key) => cache.current.has(key);
@@ -31,6 +32,7 @@ function useOxin() {
             onChange: `${name}-onChange`,
             changes: `${name}-changes`,
             onBlur: `${name}-onBlur`,
+            onFocus: `${name}-onFocus`,
             onRemove: `${name}-onRemove`,
         };
         fieldCache.getOrSet(cacheKeys.changes, 0);
@@ -85,6 +87,23 @@ function useOxin() {
             dispatch(actions_1.setValue({ name, value, validating: !!validators.length }));
             fieldCache.set(cacheKeys.changes, fieldCache.get(cacheKeys.changes) + 1);
         });
+        let showValidationFunction = visibility_1.generic;
+        if (validation === null || validation === void 0 ? void 0 : validation.showValidation) {
+            showValidationFunction = validation === null || validation === void 0 ? void 0 : validation.showValidation;
+        }
+        if (validation === null || validation === void 0 ? void 0 : validation.onBlur) {
+            showValidationFunction = visibility_1.strictlyOnBlur;
+        }
+        const touched = !!inputState.touched[name];
+        const thisValidation = fieldCache.get(cacheKeys.validationProp);
+        const showValidation = showValidationFunction({
+            touched,
+            validation: thisValidation,
+            currentFocussed: inputState.focussed,
+            isFocussed: inputState.focussed === name,
+            blurred: !!inputState.blurred[name],
+            hadChanged: !!inputState.changing[name],
+        });
         return {
             name,
             value: inputState.values[name],
@@ -93,19 +112,18 @@ function useOxin() {
             validating: !!inputState.validating[name],
             onChange: (value) => {
                 handleChange(value);
-                if (!(validation === null || validation === void 0 ? void 0 : validation.onBlur)) {
-                    runValidatorDispatch(value);
-                }
+                runValidatorDispatch(value);
             },
-            onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value) => {
-                if (validation === null || validation === void 0 ? void 0 : validation.onBlur) {
-                    handleChange(value);
-                    runValidatorDispatch(value);
-                }
+            onBlur: fieldCache.getOrSet(cacheKeys.onBlur, () => {
+                dispatch(actions_1.setBlurred(name));
             }),
             onRemove: fieldCache.getOrSet(cacheKeys.onRemove, () => {
                 dispatch(actions_1.removeField(name));
             }),
+            onFocus: fieldCache.getOrSet(cacheKeys.onFocus, () => {
+                dispatch(actions_1.setFocussed(name));
+            }),
+            showValidation
         };
     };
     return { inputState, inputProps };

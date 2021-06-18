@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeField = exports.setValidation = exports.setValue = void 0;
+exports.removeField = exports.setFocussed = exports.setBlurred = exports.setValidationVisibilty = exports.setValidation = exports.setValue = void 0;
 const types_1 = require("./types");
 const setValue = (payload) => ({
     payload,
@@ -19,6 +19,21 @@ const setValidation = (payload) => {
     };
 };
 exports.setValidation = setValidation;
+const setValidationVisibilty = (payload) => ({
+    type: types_1.ActionType.SET_VISIBILITY,
+    payload
+});
+exports.setValidationVisibilty = setValidationVisibilty;
+const setBlurred = (fieldName) => ({
+    type: types_1.ActionType.SET_BLURRED,
+    payload: { fieldName }
+});
+exports.setBlurred = setBlurred;
+const setFocussed = (fieldName) => ({
+    type: types_1.ActionType.SET_FOCUSSED,
+    payload: { fieldName }
+});
+exports.setFocussed = setFocussed;
 const removeField = (name) => ({
     payload: {
         name,

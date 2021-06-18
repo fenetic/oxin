@@ -115,7 +115,7 @@ InputState<Inputs>,
         }
       }
 
-      return newState];
+      return newState;
     }
 
     case ActionType.SET_FOCUSSED: {

@@ -7,6 +7,9 @@ var ActionType;
     ActionType["SET_VALUE"] = "SET_VALUE";
     ActionType["SET_VALIDATION"] = "SET_VALIDATION";
     ActionType["SET_VALIDATING"] = "SET_VALIDATING";
+    ActionType["SET_VISIBILITY"] = "SET_VISIBILITY";
+    ActionType["SET_FOCUSSED"] = "SET_FOCUSSED";
+    ActionType["SET_BLURRED"] = "SET_BLURRED";
     ActionType["REMOVE_FIELD"] = "REMOVE_FIELD";
 })(ActionType = exports.ActionType || (exports.ActionType = {}));
 //# sourceMappingURL=types.js.map

@@ -4,8 +4,8 @@ export const strictlyOnBlur: VisibilityCallback = ({ blurred, validation: { vali
 
 export const onBlurButNotWhenRefocussed: VisibilityCallback = ({ blurred, validation: { valid }, isFocussed }) => !valid && (blurred && !isFocussed);
 
-export const notWhenChanging: VisibilityCallback = ({ validation: { valid }, hadChanged, isFocussed }) => {
-    return !valid && (!hadChanged && !isFocussed)
+export const notWhenChanging: VisibilityCallback = ({ validation: { valid }, hadChanged, blurred }) => {
+    return !valid && blurred && !hadChanged
 };
 
 export const generic: VisibilityCallback = ({ validation: { valid }}) => !valid; 
