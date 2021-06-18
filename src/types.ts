@@ -13,6 +13,7 @@ export interface InputState<Inputs> {
   values: Partial<{ [K in keyof Inputs]: Inputs[K] }>;
   blurred: Partial<Record<keyof Inputs, number>>;
   focussed: keyof Inputs | null;
+  changing: Partial<Record<keyof Inputs, boolean>>;
 }
 
 export interface InputOptions<K, T> {
@@ -55,6 +56,7 @@ export interface VisibilityCallbackProps {
   currentFocussed: string | null;
   isFocussed: boolean;
   validation: ValidationProps;
+  hadChanged: boolean;
 }
 
 export type VisibilityCallback = (props: VisibilityCallbackProps) => boolean;

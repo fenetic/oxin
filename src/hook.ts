@@ -188,18 +188,28 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
         );
       },
     );
+
     // Should take a look at an api for choosing from library-provided functions
-    const showValidationFunction = validation?.showValidation || validation?.onBlur ? 
-      strictlyOnBlur : generic;
+    let showValidationFunction = generic;
+
+    if (validation?.showValidation) {
+      showValidationFunction = validation?.showValidation;
+    }
+
+    if (validation?.onBlur) {
+      showValidationFunction = strictlyOnBlur;
+    }
 
     const touched = !!inputState.touched[name]
     const thisValidation = fieldCache.get(cacheKeys.validationProp);
+
     const showValidation = showValidationFunction({
       touched,
       validation: thisValidation,
       currentFocussed: inputState.focussed as string,
       isFocussed: inputState.focussed === name,
-      blurred: !!inputState.blurred[name]
+      blurred: !!inputState.blurred[name],
+      hadChanged: !!inputState.changing[name],
     })
 
     return {

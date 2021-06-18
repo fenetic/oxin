@@ -5,6 +5,8 @@ import userEvent from '@testing-library/user-event';
 import { TestForm, TestInput } from '../test-components';
 import { VisibilityCallback } from '../types';
 
+import { notWhenChanging } from '../visibility'
+
 jest.mock('lodash.debounce', () => jest.fn((fn) => fn));
 
 const required = {
@@ -52,8 +54,7 @@ const Form = ({ showValidation }: { showValidation?: VisibilityCallback }) => {
                 })}
                 data-testid='with-visibility-function'
               />
-
-              <TestInput
+       <TestInput
                 {...propsCreator({
                   name: 'without-visibility-function',
                   validators: [
@@ -64,7 +65,7 @@ const Form = ({ showValidation }: { showValidation?: VisibilityCallback }) => {
                   ],
                 })}
                 data-testid='without-visibility-function'
-              />
+              /> 
             </>
           );
         }}
@@ -107,9 +108,9 @@ describe('validation-visibility', () => {
     });
 
     test('uses context of form as arguments to showValidation', async () => {
-      const never: VisibilityCallback = ({ blurred }) => blurred;
+      const onBlur: VisibilityCallback = ({ blurred }) => blurred
 
-      const { queryByTestId, findByTestId } = render(<Form showValidation={never} />);
+      const { queryByTestId, findByTestId } = render(<Form showValidation={onBlur} />);
 
       const inputWithVisibilityFunction = await findByTestId('input-with-visibility-function');
       const inputNoVisibilityFunction = await findByTestId('input-without-visibility-function');
@@ -129,6 +130,32 @@ describe('validation-visibility', () => {
       });
 
       await findByTestId('listeningToShowValidation-with-visibility-function');
+    })
+  })
+
+  describe('custom validation behaviour', () => {
+    test('removes validation when changing', async () => {
+      const { queryByTestId, findByTestId } = render(<Form showValidation={notWhenChanging} />);
+
+      const input = await findByTestId('input-with-visibility-function');
+      await act(async () => {
+        await userEvent.type(input, 'Me gustas cuando callas', { delay: 1 });
+        await fireEvent.blur(input);
+      })
+
+      await findByTestId('listeningToShowValidation-with-visibility-function');
+      await act(async() => {
+        await fireEvent.focus(input)
+      })
+
+      await findByTestId('listeningToShowValidation-with-visibility-function');
+      await act(async () => {
+        await fireEvent.change(input, { target: { value: 'Me gustas cuando callas!' }});
+      })
+
+      let showValid = await queryByTestId('listeningToShowValidation-with-visibility-function');
+
+      expect(showValid).toBe(null)
     })
   })
 })

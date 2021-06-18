@@ -21,6 +21,7 @@ export const createInitialState = <Inputs>(): InputState<Inputs> => ({
   values: {},
   blurred: {},
   focussed: null,
+  changing: {}
 });
 
 export type OxinReducer<Inputs> = (
@@ -29,7 +30,7 @@ export type OxinReducer<Inputs> = (
 ) => InputState<Inputs>;
 
 export const createReducer = <Inputs>(): Reducer<
-  InputState<Inputs>,
+InputState<Inputs>,
   Action<Inputs>
 > => (state, action) => {
   switch (action.type) {
@@ -52,6 +53,14 @@ export const createReducer = <Inputs>(): Reducer<
           ...state.validating,
           [name]: true,
         },
+        changing: {
+          ...Object.keys(state.changing).reduce((acc: any, curr) => {
+            acc[curr] = false;
+            return acc;
+          }, {}),
+          [name]: true
+        },
+        focussed: name
       };
 
       return newState;
@@ -97,10 +106,16 @@ export const createReducer = <Inputs>(): Reducer<
         blurred: {
           ...state.blurred,
           [fieldName]: true
+        },
+        changing: {
+          ...Object.keys(state.changing).reduce((acc: any, curr) => {
+            acc[curr] = false;
+            return acc;
+          }, {}),
         }
       }
 
-      return newState;
+      return newState];
     }
 
     case ActionType.SET_FOCUSSED: {
@@ -110,7 +125,13 @@ export const createReducer = <Inputs>(): Reducer<
 
       const newState: InputState<Inputs> = {
         ...state,
-        focussed: fieldName
+        focussed: fieldName,
+        changing: {
+          ...Object.keys(state.changing).reduce((acc: any, curr) => {
+            acc[curr] = false;
+            return acc;
+          }, {}),}
+
       }
 
       return newState;
