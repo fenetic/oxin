@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid/non-secure';
 import { ValidationProps, Oxin, ValidationState } from './types';
 
 import { createInitialState, OxinReducer, createReducer } from './reducer';
-import { setValue, removeField, setValidation } from './actions';
+import { setValue, removeField, setValidation, setFocussed, setBlurred } from './actions';
 import {
   runValidators,
   getBooleanValidators,
@@ -13,6 +13,8 @@ import {
   validationEquals,
   validatorsEquals,
 } from './validation';
+
+import { generic, strictlyOnBlur } from './visibility'
 
 interface Cache {
   getOrSet: (key: string, value: any) => any;
@@ -55,6 +57,7 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       onChange: `${name}-onChange`,
       changes: `${name}-changes`,
       onBlur: `${name}-onBlur`,
+      onFocus: `${name}-onFocus`,
       onRemove: `${name}-onRemove`,
     };
 
@@ -185,6 +188,18 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
         );
       },
     );
+    // Should take a look at an api for choosing from library-provided functions
+    const showValidationFunction = validation?.showValidation || validation?.onBlur ? 
+      strictlyOnBlur : generic;
+
+    const touched = !!inputState.touched[name]
+    const thisValidation = fieldCache.get(cacheKeys.validationProp);
+    const showValidation = showValidationFunction({
+      touched,
+      validation: thisValidation,
+      currentFocussed: inputState.focussed as string,
+      blurred: !!inputState.blurred[name]
+    })
 
     return {
       name,
@@ -194,20 +209,18 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       validating: !!inputState.validating[name],
       onChange: (value) => {
         handleChange(value);
-        
-        if (!validation?.onBlur) {
-          runValidatorDispatch(value)
-        }
+        runValidatorDispatch(value)
       },
-      onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value: any) => {
-        if (validation?.onBlur) {
-          handleChange(value);
-          runValidatorDispatch(value)
-        }
+      onBlur: fieldCache.getOrSet(cacheKeys.onBlur, () => {
+        dispatch(setBlurred(name));
       }),
       onRemove: fieldCache.getOrSet(cacheKeys.onRemove, () => {
         dispatch(removeField(name));
       }),
+      onFocus: fieldCache.getOrSet(cacheKeys.onFocus, () => {
+        dispatch(setFocussed(name))
+      }),
+      showValidation
     };
   };
 

@@ -7,6 +7,8 @@ import {
   SetValueAction,
   SetValidationAction,
   RemoveInputAction,
+  SetFocussedAction,
+  SetBlurredAction,
 } from './types';
 
 import { allFieldsValid } from './validation';
@@ -17,6 +19,8 @@ export const createInitialState = <Inputs>(): InputState<Inputs> => ({
   validating: {},
   validation: {},
   values: {},
+  blurred: {},
+  focussed: null,
 });
 
 export type OxinReducer<Inputs> = (
@@ -78,6 +82,40 @@ export const createReducer = <Inputs>(): Reducer<
       return newState;
     }
 
+    case ActionType.SET_BLURRED: {
+      const {
+        payload: { fieldName }
+      } = action as SetBlurredAction<keyof Inputs>;
+
+      const newState: InputState<Inputs> = {
+        ...state,
+        focussed: null,
+        touched: {
+          ...state.touched,
+          [fieldName]: true,
+        },
+        blurred: {
+          ...state.blurred,
+          [fieldName]: true
+        }
+      }
+
+      return newState;
+    }
+
+    case ActionType.SET_FOCUSSED: {
+      const {
+        payload: { fieldName }
+      } = action as SetFocussedAction<keyof Inputs>;
+
+      const newState: InputState<Inputs> = {
+        ...state,
+        focussed: fieldName
+      }
+
+      return newState;
+    }
+
     case ActionType.REMOVE_FIELD: {
       const {
         payload: { name },
@@ -91,7 +129,7 @@ export const createReducer = <Inputs>(): Reducer<
       delete newState.validation[name as keyof Inputs];
       delete newState.values[name as keyof Inputs];
       delete newState.validating[name as keyof Inputs];
-
+      
       newState.valid = allFieldsValid(newState);
 
       return newState;

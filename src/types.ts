@@ -11,6 +11,8 @@ export interface InputState<Inputs> {
   validation: Partial<Record<keyof Inputs, ValidationState | undefined>>;
   validating: Partial<Record<keyof Inputs, boolean | undefined>>;
   values: Partial<{ [K in keyof Inputs]: Inputs[K] }>;
+  blurred: Partial<Record<keyof Inputs, number>>;
+  focussed: keyof Inputs | null;
 }
 
 export interface InputOptions<K, T> {
@@ -47,10 +49,20 @@ export type ValidatorTuple = [Validator, ValidatorMessage];
 
 export declare type OptionsValidators = (Validator | ValidatorCreator)[];
 
+export interface VisibilityCallbackProps {
+  touched: boolean;
+  blurred: boolean;
+  currentFocussed: string | null;
+  validation: ValidationProps;
+}
+
+export type VisibilityCallback = (props: VisibilityCallbackProps) => boolean;
+
 export interface OptionsValidation {
   debounce?: number;
   onBlur?: boolean;
   initialValue?: boolean;
+  showValidation?: (props: VisibilityCallbackProps) => boolean;
 }
 
 export interface ValidationState {
@@ -82,6 +94,7 @@ export interface OxinProps<K = string, T = any> {
   onChange: (value: T) => void;
   onBlur: (value: T) => void;
   onRemove: () => void;
+  showValidation: boolean;
 }
 
 export enum ActionType {
@@ -89,6 +102,9 @@ export enum ActionType {
   SET_VALUE = 'SET_VALUE',
   SET_VALIDATION = 'SET_VALIDATION',
   SET_VALIDATING = 'SET_VALIDATING',
+  SET_VISIBILITY = 'SET_VISIBILITY',
+  SET_FOCUSSED = 'SET_FOCUSSED',
+  SET_BLURRED = 'SET_BLURRED',
   REMOVE_FIELD = 'REMOVE_FIELD',
 }
 
@@ -112,6 +128,25 @@ export interface SetValidationAction<K> extends BaseAction {
   };
 }
 
+export interface SetVisibilityAction<K> extends BaseAction {
+  payload: {
+    fieldName: K;
+    visibile: boolean;
+  }
+}
+
+export interface SetBlurredAction<K> extends BaseAction {
+  payload: {
+    fieldName: K;
+  }
+}
+
+export interface SetFocussedAction<K> extends BaseAction {
+  payload: {
+    fieldName: K;
+  }
+}
+
 export interface RemoveInputAction<K> extends BaseAction {
   payload: {
     name: K;
@@ -121,4 +156,8 @@ export interface RemoveInputAction<K> extends BaseAction {
 export type Action<Inputs> =
   | SetValueAction<keyof Inputs, unknown>
   | SetValidationAction<keyof Inputs>
-  | RemoveInputAction<keyof Inputs>;
+  | SetVisibilityAction<keyof Inputs>
+  | SetBlurredAction<keyof Inputs>
+  | SetFocussedAction<keyof Inputs>
+  | RemoveInputAction<keyof Inputs>
+  ;

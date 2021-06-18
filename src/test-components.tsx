@@ -12,6 +12,7 @@ export const TestInput = React.memo(function TestInput({
   validating,
   validation,
   value,
+  showValidation
 }: OxinProps) {
   const renderCounter = useRef(0);
 
@@ -24,6 +25,7 @@ export const TestInput = React.memo(function TestInput({
       <span data-testid={`renderCounter-${name}`}>{renderCounter.current}</span>
       <span data-testid={`validating-${name}`}>{validating?.toString()}</span>
       <span data-testid={`valid-${name}`}>{validation?.valid.toString()}</span>
+      {showValidation && <span data-testid={`listeningToShowValidation-${name}`}>{validation?.valid.toString()}</span>}
       {!!validation?.messages.length && (
         <span data-testid={`validationMessages-${name}`}>
           {validation.messages.map((msg, i) => (

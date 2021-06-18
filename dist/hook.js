@@ -75,13 +75,15 @@ function useOxin() {
                 valid: acc.valid && curr.valid,
             }), { valid: true, messages: [] }));
         }
-        const handleChange = fieldCache.getOrSet(cacheKeys.onChange, async (value) => {
-            dispatch(actions_1.setValue({ name, value, validating: !!validators.length }));
-            fieldCache.set(cacheKeys.changes, fieldCache.get(cacheKeys.changes) + 1);
+        const runValidatorDispatch = (value) => {
             const dispatchValidators = !!(validation === null || validation === void 0 ? void 0 : validation.debounce) && fieldCache.get(cacheKeys.changes) > 1
                 ? handleRunValidatorsDebounced
                 : handleRunValidators;
             dispatchValidators(value);
+        };
+        const handleChange = fieldCache.getOrSet(cacheKeys.onChange, async (value) => {
+            dispatch(actions_1.setValue({ name, value, validating: !!validators.length }));
+            fieldCache.set(cacheKeys.changes, fieldCache.get(cacheKeys.changes) + 1);
         });
         return {
             name,
@@ -89,10 +91,16 @@ function useOxin() {
             touched: !!inputState.touched[name],
             validation: fieldCache.get(cacheKeys.validationProp),
             validating: !!inputState.validating[name],
-            onChange: handleChange,
+            onChange: (value) => {
+                handleChange(value);
+                if (!(validation === null || validation === void 0 ? void 0 : validation.onBlur)) {
+                    runValidatorDispatch(value);
+                }
+            },
             onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value) => {
                 if (validation === null || validation === void 0 ? void 0 : validation.onBlur) {
                     handleChange(value);
+                    runValidatorDispatch(value);
                 }
             }),
             onRemove: fieldCache.getOrSet(cacheKeys.onRemove, () => {
