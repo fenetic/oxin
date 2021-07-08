@@ -21,7 +21,7 @@ export const createInitialState = <Inputs>(): InputState<Inputs> => ({
   values: {},
   blurred: {},
   focussed: null,
-  changing: {}
+  changing: {},
 });
 
 export type OxinReducer<Inputs> = (
@@ -30,7 +30,7 @@ export type OxinReducer<Inputs> = (
 ) => InputState<Inputs>;
 
 export const createReducer = <Inputs>(): Reducer<
-InputState<Inputs>,
+  InputState<Inputs>,
   Action<Inputs>
 > => (state, action) => {
   switch (action.type) {
@@ -58,9 +58,9 @@ InputState<Inputs>,
             acc[curr] = false;
             return acc;
           }, {}),
-          [name]: true
+          [name]: !fromInitial,
         },
-        focussed: name
+        focussed: !fromInitial ? name : null,
       };
 
       return newState;
@@ -93,7 +93,7 @@ InputState<Inputs>,
 
     case ActionType.SET_BLURRED: {
       const {
-        payload: { fieldName }
+        payload: { fieldName },
       } = action as SetBlurredAction<keyof Inputs>;
 
       const newState: InputState<Inputs> = {
@@ -105,22 +105,22 @@ InputState<Inputs>,
         },
         blurred: {
           ...state.blurred,
-          [fieldName]: true
+          [fieldName]: true,
         },
         changing: {
           ...Object.keys(state.changing).reduce((acc: any, curr) => {
             acc[curr] = false;
             return acc;
           }, {}),
-        }
-      }
+        },
+      };
 
       return newState;
     }
 
     case ActionType.SET_FOCUSSED: {
       const {
-        payload: { fieldName }
+        payload: { fieldName },
       } = action as SetFocussedAction<keyof Inputs>;
 
       const newState: InputState<Inputs> = {
@@ -130,9 +130,9 @@ InputState<Inputs>,
           ...Object.keys(state.changing).reduce((acc: any, curr) => {
             acc[curr] = false;
             return acc;
-          }, {}),}
-
-      }
+          }, {}),
+        },
+      };
 
       return newState;
     }
@@ -150,7 +150,7 @@ InputState<Inputs>,
       delete newState.validation[name as keyof Inputs];
       delete newState.values[name as keyof Inputs];
       delete newState.validating[name as keyof Inputs];
-      
+
       newState.valid = allFieldsValid(newState);
 
       return newState;
