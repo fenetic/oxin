@@ -153,14 +153,21 @@ describe('Props', () => {
     expect(valid1.textContent).toBe('true');
     expect(valid2.textContent).toBe('true');
     expect(valid3.textContent).toBe('false');
+  });
+
+  test('valid onBlur', async () => {
+    const { findByTestId } = render(<Form />);
+
+    const onBlurInput = await findByTestId('input-test3');
+    const onBlurValid = await findByTestId('valid-test3');
 
     await act(async () => {
-      await userEvent.clear(input3);
-      await userEvent.type(input3, 'Also valid');
+      await userEvent.clear(onBlurInput);
+      await userEvent.type(onBlurInput, 'Valid', { delay: 1 });
     });
 
-    expect(valid3.textContent).toBe('true');
-  });
+    expect(onBlurValid.textContent).toBe('true');
+  })
 
   test('allValid', async () => {
     const { findByTestId } = render(<Form />);
@@ -275,7 +282,7 @@ describe('Props', () => {
     });
 
     expect(valid2.textContent).toBe('false');
-    expect(touched2.textContent).toBe('false');
+    expect(touched2.textContent).toBe('true');
     expect(valid3.textContent).toBe('false');
     expect(touched3.textContent).toBe('true');
     expect(messages3.textContent).toBe('Give it some');

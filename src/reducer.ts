@@ -7,6 +7,8 @@ import {
   SetValueAction,
   SetValidationAction,
   RemoveInputAction,
+  SetFocussedAction,
+  SetBlurredAction,
 } from './types';
 
 import { allFieldsValid } from './validation';
@@ -17,6 +19,9 @@ export const createInitialState = <Inputs>(): InputState<Inputs> => ({
   validating: {},
   validation: {},
   values: {},
+  blurred: {},
+  focussed: null,
+  changing: {},
 });
 
 export type OxinReducer<Inputs> = (
@@ -48,6 +53,14 @@ export const createReducer = <Inputs>(): Reducer<
           ...state.validating,
           [name]: true,
         },
+        changing: {
+          ...Object.keys(state.changing).reduce((acc: any, curr) => {
+            acc[curr] = false;
+            return acc;
+          }, {}),
+          [name]: !fromInitial,
+        },
+        focussed: !fromInitial ? name : null,
       };
 
       return newState;
@@ -74,6 +87,52 @@ export const createReducer = <Inputs>(): Reducer<
       };
 
       newState.valid = allFieldsValid(newState);
+
+      return newState;
+    }
+
+    case ActionType.SET_BLURRED: {
+      const {
+        payload: { fieldName },
+      } = action as SetBlurredAction<keyof Inputs>;
+
+      const newState: InputState<Inputs> = {
+        ...state,
+        focussed: null,
+        touched: {
+          ...state.touched,
+          [fieldName]: true,
+        },
+        blurred: {
+          ...state.blurred,
+          [fieldName]: true,
+        },
+        changing: {
+          ...Object.keys(state.changing).reduce((acc: any, curr) => {
+            acc[curr] = false;
+            return acc;
+          }, {}),
+        },
+      };
+
+      return newState;
+    }
+
+    case ActionType.SET_FOCUSSED: {
+      const {
+        payload: { fieldName },
+      } = action as SetFocussedAction<keyof Inputs>;
+
+      const newState: InputState<Inputs> = {
+        ...state,
+        focussed: fieldName,
+        changing: {
+          ...Object.keys(state.changing).reduce((acc: any, curr) => {
+            acc[curr] = false;
+            return acc;
+          }, {}),
+        },
+      };
 
       return newState;
     }

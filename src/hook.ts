@@ -5,7 +5,7 @@ import { nanoid } from 'nanoid/non-secure';
 import { ValidationProps, Oxin, ValidationState } from './types';
 
 import { createInitialState, OxinReducer, createReducer } from './reducer';
-import { setValue, removeField, setValidation } from './actions';
+import { setValue, removeField, setValidation, setFocussed, setBlurred } from './actions';
 import {
   runValidators,
   getBooleanValidators,
@@ -13,6 +13,8 @@ import {
   validationEquals,
   validatorsEquals,
 } from './validation';
+
+import { generic, strictlyOnBlur } from './visibility'
 
 interface Cache {
   getOrSet: (key: string, value: any) => any;
@@ -55,6 +57,7 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       onChange: `${name}-onChange`,
       changes: `${name}-changes`,
       onBlur: `${name}-onBlur`,
+      onFocus: `${name}-onFocus`,
       onRemove: `${name}-onRemove`,
     };
 
@@ -165,6 +168,15 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       );
     }
 
+    const runValidatorDispatch = (value: any) => {
+      const dispatchValidators =
+          !!validation?.debounce && fieldCache.get(cacheKeys.changes) > 1
+            ? handleRunValidatorsDebounced
+            : handleRunValidators;
+
+        dispatchValidators(value);
+    }
+
     const handleChange = fieldCache.getOrSet(
       cacheKeys.onChange,
       async (value: any) => {
@@ -174,15 +186,31 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
           cacheKeys.changes,
           fieldCache.get(cacheKeys.changes) + 1,
         );
-
-        const dispatchValidators =
-          !!validation?.debounce && fieldCache.get(cacheKeys.changes) > 1
-            ? handleRunValidatorsDebounced
-            : handleRunValidators;
-
-        dispatchValidators(value);
       },
     );
+
+    // Should take a look at an api for choosing from library-provided functions
+    let showValidationFunction = generic;
+
+    if (validation?.showValidation) {
+      showValidationFunction = validation?.showValidation;
+    }
+
+    if (validation?.onBlur) {
+      showValidationFunction = strictlyOnBlur;
+    }
+
+    const touched = !!inputState.touched[name]
+    const thisValidation = fieldCache.get(cacheKeys.validationProp);
+
+    const showValidation = showValidationFunction({
+      touched,
+      validation: thisValidation,
+      currentFocussed: inputState.focussed as string,
+      isFocussed: inputState.focussed === name,
+      blurred: !!inputState.blurred[name],
+      hadChanged: !!inputState.changing[name],
+    })
 
     return {
       name,
@@ -190,15 +218,20 @@ export function useOxin<Inputs = Record<string, unknown>>(): Oxin<Inputs> {
       touched: !!inputState.touched[name],
       validation: fieldCache.get(cacheKeys.validationProp),
       validating: !!inputState.validating[name],
-      onChange: handleChange,
-      onBlur: fieldCache.getOrSet(cacheKeys.onBlur, (value: any) => {
-        if (validation?.onBlur) {
-          handleChange(value);
-        }
+      onChange: (value) => {
+        handleChange(value);
+        runValidatorDispatch(value)
+      },
+      onBlur: fieldCache.getOrSet(cacheKeys.onBlur, () => {
+        dispatch(setBlurred(name));
       }),
       onRemove: fieldCache.getOrSet(cacheKeys.onRemove, () => {
         dispatch(removeField(name));
       }),
+      onFocus: fieldCache.getOrSet(cacheKeys.onFocus, () => {
+        dispatch(setFocussed(name))
+      }),
+      showValidation
     };
   };
 
